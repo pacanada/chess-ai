@@ -17,14 +17,14 @@ def test_engine():
         chess = Chess(fen_pos)
         # something is wrong with transpositions
         agent = Agent(
-            depth=4,
+            depth=2,
             color=chess.state.turn,
             alpha_beta=True,
             move_ordering=True,
             use_transpositions=True,
         )
         t0 = time.time()
-        recommended_moves = agent.recommend(chess, True)
+        recommended_moves = agent.recommend(node=chess, order=True, random_flag=False)
 
         t1 = time.time()
         # in case there are several moves with same value
