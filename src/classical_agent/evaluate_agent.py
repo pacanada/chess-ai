@@ -4,10 +4,10 @@ from agent import Agent
 from chess_python.chess import Chess
 from src.evaluation.utils import FEN_POSITIONS, evaluate_move
 
-# depth 4 3.93
-# depth 3 2.86
-# depth 2 4.45 (weird)
-# depth 1 1.37
+# depth 4 3.93 / 3.65
+# depth 3 2.86 / 2.79
+# depth 2 4.45 (weird) / 4.47
+# depth 1 1.37 / with pawns 2.17
 
 
 def test_engine():
@@ -45,7 +45,7 @@ def test_engine():
         print("Evaluation", evaluation_avg)
         all_evals.append(evaluation_avg)
         if len(best_moves)>1:
-            print("Evaluations has been averaged.All evals: ", [round(evalu,2) for evalu in evaluations])
+            print("Evaluations has been averaged. All evals: ", [round(evalu,2) for evalu in evaluations])
 
     print(f"Overall score for depth {agent.depth} {sum(all_evals)/len(all_evals)}" )
 
