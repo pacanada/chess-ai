@@ -1,2 +1,4 @@
 prof*.txt
 .venv/
+__pycache__
+*.egg-info
