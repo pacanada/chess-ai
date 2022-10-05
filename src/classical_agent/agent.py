@@ -1,3 +1,4 @@
+import random
 import time
 from copy import deepcopy
 from typing import Dict, List, Literal, Tuple
@@ -153,7 +154,12 @@ class Agent:
 
         return value
 
-    def recommend(self, node: Chess, order: bool = False):
+    def recommend(self, node: Chess, order: bool = False, random_flag=False):
+        if random_flag:
+            #sanity check
+            legal_moves = node.legal_moves()
+            return [(random.choice(legal_moves), "", "")]
+
         list_moves: List[Tuple[str, float, str]] = []
         if self.move_ordering:
             legal_moves = MoveOrderer().order(
