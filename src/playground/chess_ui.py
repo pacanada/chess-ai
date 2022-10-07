@@ -54,6 +54,7 @@ window = pyglet.window.Window(W,H)
 background = pyglet.resource.image("resources/board.svg.png")
 
 pieces = generate_sprites_from_board(board=game.state.board)
+circles = []
 
 
 
@@ -66,17 +67,46 @@ def on_draw():
     for piece in pieces:
         piece.draw()
 
+def on_update():
+    window.clear()
+    print("updating")
+    background.blit(0,0)
+    for piece in pieces:
+        piece.draw()
+
+
 @window.event
 def on_mouse_press(x, y, button, modifiers):
+
+    global pos_i
+    pos_i = from_coord_to_index(x,y)
     print(f"Moused pressed {x=}, {y=}, {button=}, {modifiers=}", )
-    print(f"Corresponding to index: {from_coord_to_index(x,y)}" )
-    
+    print(f"Corresponding to index: {pos_i}")
+    # allowed_moves = game.legal_moves_in_position(pos=pos)
+    # circles = []
+    # for index in allowed_moves:
+    #     x,y = from_index_to_coord(index)
+    #     circle = pyglet.shapes.Circle(x, y, 10, color=(0, 0, 0))
+    #     circle.draw()
+    #     window.on
+    #     circles.append(circle)
+    #     print(x,y)
+
+
 
 
 @window.event
 def on_mouse_release(x, y, button, modifiers):
-    pass
-    #print(f"Moused realeased {x=}, {y=}, {button=}, {modifiers=}", )
+    global pos_f
+    pos_f = from_coord_to_index(x,y)
+    print(pos_i, pos_f)
+    game.move(move=[pos_i, pos_f, None], check_allowed_moves=True)
+    print(game)
+    pieces = generate_sprites_from_board(board=game.state.board)
+    # background.blit(0,0)
+    # for piece in pieces:
+    #     piece.draw()
+    print(f"Moused realeased {x=}, {y=}, {button=}, {modifiers=}", )
 @window.event
 def on_mouse_drag(x, y, dx, dy, buttons, modifiers):
     print(f"Moused dragging {x=}, {y=},{dx=}, {dy=}, {buttons=}, {modifiers=}", )
