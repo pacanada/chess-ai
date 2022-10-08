@@ -78,7 +78,6 @@ class ChessBoard(pyglet.window.Window):
         circles = []
         for index in self.allowed_moves_in_pos:
             x,y = from_index_to_coord(index)
-            print(x,y)
             circle = pyglet.shapes.Circle(x, y, 8, color=(33,39,33), batch=batch_circle)
 
             circles.append(circle)
@@ -99,17 +98,29 @@ class ChessBoard(pyglet.window.Window):
             self.close()
 
     def on_mouse_press(self, x, y, button, modifiers):
-        if self.pos_i is None:
+        """Implementing main UI logic"""
+        if self.pos_i is None and self.game.state.board[from_coord_to_index(x,y)]*self.game.state.turn>0:
             self.pos_i = from_coord_to_index(x,y)
             self.allowed_moves_in_pos = self.game.legal_moves_in_position(pos=self.pos_i)
-            self.draw_allowed_moves(self.pos_i)
-        else:
-            self.pos_f = from_coord_to_index(x,y)
-            self.game.move(move=[self.pos_i, self.pos_f, None], check_allowed_moves=True)
-            print(self.game)
-            self.draw_sprites_from_board()
-            self.pos_i = None
-            self.pos_f = None
+            self.draw_allowed_moves()
+        elif self.pos_i is not None:
+            if self.game.state.board[from_coord_to_index(x,y)]*self.game.state.turn>0:
+                # reselecting one square of friendly piece
+                self.pos_i = from_coord_to_index(x,y)
+                self.allowed_moves_in_pos = self.game.legal_moves_in_position(pos=self.pos_i)
+                self.draw_allowed_moves()
+            else:
+                self.pos_f = from_coord_to_index(x,y)
+                try:
+                    self.game.move(move=[self.pos_i, self.pos_f, None], check_allowed_moves=True)
+                except ValueError as e:
+                    print("Error: Invalid move", e)
+                self.draw_sprites_from_board()
+                self.allowed_moves_in_pos = []
+                self.draw_allowed_moves()
+                self.pos_i = None
+                self.pos_f = None
+            # call agent
         if DEBUG:
             print(f"Moused pressed {x=}, {y=}, {button=}, {modifiers=}", )
             print(f"Corresponding to index: {self.pos_i}")
@@ -119,7 +130,7 @@ class ChessBoard(pyglet.window.Window):
         #print(self.pos_i, pos_f)
         #self.game.move(move=[self.pos_i, pos_f, None], check_allowed_moves=True)
         #print(self.game)
-        #self.draw_sprites_from_board()
+        #self.draw_sprites_from_board()q
         print(f"Moused realeased {x=}, {y=}, {button=}, {modifiers=}", )
 
     def on_mouse_drag(self,x, y, dx, dy, buttons, modifiers):
