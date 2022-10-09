@@ -1,6 +1,9 @@
+from copy import deepcopy
 from typing import Tuple
 import pyglet
 from chess_python.chess import Chess
+
+from src.classical_agent.agent import Agent
 
 W = H = 480
 PIECE_IMAGE_DICT = {
@@ -46,19 +49,18 @@ class ChessBoard(pyglet.window.Window):
         self,
         width: int,
         height: int,
-        name: str = "Window",
-        dt: float = 10,
+        name: str = "Chess",
 
     ):
         super().__init__(width, height, name, resizable=False)
         self.set_vsync(False)
-        #pyglet.clock.schedule_interval(self.update, dt)
         self.fps_display = pyglet.window.FPSDisplay(window=self)
         self.game = Chess()
         self.background = pyglet.resource.image("resources/board.svg.png")
         self.pos_i = None
         self.pos_f = None
         self.allowed_moves_in_pos = []
+        self.result_label = None
 
     def draw_sprites_from_board(self):
 
@@ -73,22 +75,30 @@ class ChessBoard(pyglet.window.Window):
         batch.draw()
 
     def draw_allowed_moves(self):
-        batch_circle = pyglet.graphics.Batch()
-        #allowed_moves = self.game.legal_moves_in_position(pos=pos)
+        batch_legal_moves = pyglet.graphics.Batch()
         circles = []
         for index in self.allowed_moves_in_pos:
             x,y = from_index_to_coord(index)
-            circle = pyglet.shapes.Circle(x, y, 8, color=(33,39,33), batch=batch_circle)
+            circle = pyglet.shapes.Circle(x, y, 8, color=(33,39,33), batch=batch_legal_moves)
 
             circles.append(circle)
-        batch_circle.draw()
-
+        batch_legal_moves.draw()
+    def draw_result(self):
+        if self.game.result:
+            result_dict = {1:"White wins", -1: "Black wins", 0: "Draw"}
+            self.result_label = pyglet.text.Label(result_dict[self.game.result] + "\n Press q to quit.",
+                          font_name='Times New Roman',
+                          font_size=24,
+                          x=W//2, y=W//2,
+                          anchor_x='center', anchor_y='center')
+            self.result_label.draw()
 
     def on_draw(self):
         self.clear()
         self.background.blit(0,0)
         self.draw_sprites_from_board()
         self.draw_allowed_moves()
+        self.draw_result()
 
 
     def on_key_press(self, symbol, modifier): 
@@ -99,6 +109,8 @@ class ChessBoard(pyglet.window.Window):
 
     def on_mouse_press(self, x, y, button, modifiers):
         """Implementing main UI logic"""
+        
+
         if self.pos_i is None and self.game.state.board[from_coord_to_index(x,y)]*self.game.state.turn>0:
             self.pos_i = from_coord_to_index(x,y)
             self.allowed_moves_in_pos = self.game.legal_moves_in_position(pos=self.pos_i)
@@ -113,28 +125,54 @@ class ChessBoard(pyglet.window.Window):
                 self.pos_f = from_coord_to_index(x,y)
                 try:
                     self.game.move(move=[self.pos_i, self.pos_f, None], check_allowed_moves=True)
+                    self.game.update_outcome()
+                    self.draw_result()
+
                 except ValueError as e:
                     print("Error: Invalid move", e)
                 self.draw_sprites_from_board()
                 self.allowed_moves_in_pos = []
-                self.draw_allowed_moves()
                 self.pos_i = None
                 self.pos_f = None
-            # call agent
+                # opponent          
+                self.handle_opponent_turn()
+
         if DEBUG:
             print(f"Moused pressed {x=}, {y=}, {button=}, {modifiers=}", )
             print(f"Corresponding to index: {self.pos_i}")
 
+    def handle_opponent_turn(self):
+        self.make_opponenet_move()
+        self.game.update_outcome()
+        self.draw_result()
+
     def on_mouse_release(self, x, y, button, modifiers):
-        #pos_f = from_coord_to_index(x,y)
-        #print(self.pos_i, pos_f)
-        #self.game.move(move=[self.pos_i, pos_f, None], check_allowed_moves=True)
-        #print(self.game)
-        #self.draw_sprites_from_board()q
-        print(f"Moused realeased {x=}, {y=}, {button=}, {modifiers=}", )
+        if DEBUG:
+            print(f"Moused realeased {x=}, {y=}, {button=}, {modifiers=}", )
 
     def on_mouse_drag(self,x, y, dx, dy, buttons, modifiers):
-        print(f"Moused dragging {x=}, {y=},{dx=}, {dy=}, {buttons=}, {modifiers=}", )
+        if DEBUG:
+            print(f"Moused dragging {x=}, {y=},{dx=}, {dy=}, {buttons=}, {modifiers=}", )
+
+    def make_opponenet_move(self):
+
+        game_copy = deepcopy(self.game)
+        agent = Agent(
+            depth=2,
+            color=game_copy.state.turn,
+            alpha_beta=True,
+            move_ordering=True,
+            use_transpositions=True,
+        )
+
+        recommended_moves = agent.recommend(node=game_copy, order=True, random_flag=False)
+
+
+        # in case there are several moves with same value
+        best_move = recommended_moves[0][0]
+        if DEBUG:
+            print("Agent recomendation: ", best_move)
+        self.game.move(best_move)
 
 
 
