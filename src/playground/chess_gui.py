@@ -89,6 +89,7 @@ class ChessBoard(pyglet.window.Window):
             self.result_label = pyglet.text.Label(result_dict[self.game.result] + "\n Press q to quit.",
                           font_name='Times New Roman',
                           font_size=24,
+                          color=(0,0,0, 255),
                           x=W//2, y=W//2,
                           anchor_x='center', anchor_y='center')
             self.result_label.draw()
@@ -158,7 +159,7 @@ class ChessBoard(pyglet.window.Window):
 
         game_copy = deepcopy(self.game)
         agent = Agent(
-            depth=2,
+            depth=3, # actually is 4
             color=game_copy.state.turn,
             alpha_beta=True,
             move_ordering=True,

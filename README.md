@@ -1,6 +1,14 @@
 # ChessAI
 
 Attempt to create a decent adversary to play chess against. The game implementation used for the agents in this project is another personal project [chess_python](https://github.com/pacanada/chess-python)
+
+Run the (very basic) GUI with:
+```cmd
+python -m src.playground.chess_gui
+```
+<img src="docs/screenshot_2.png" width="380" height="400">
+<img src="docs/screenshot_1.png" width="380" height="400">
+
 ## Plan
 **Classical engine**:
 
@@ -31,3 +39,8 @@ baseline for classical engine agent.
 **UI**
 
 Important for testing
+TODO:
+
+ - [X] Basic UI
+ - [ ] Play also as black inverting board
+ - [ ] Allow args when launching the GUI (depth, agent type, fen)
