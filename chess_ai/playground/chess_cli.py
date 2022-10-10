@@ -1,7 +1,7 @@
 from copy import deepcopy
 from chess_python.chess import Chess, ChessUtils
 
-from src.classical_agent.agent import Agent
+from chess_ai.classical_agent.agent import Agent
 
 
 def main():

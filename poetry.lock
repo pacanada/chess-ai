@@ -1,0 +1,30 @@
+[[package]]
+name = "chess-python-pip"
+version = "0.1.6"
+description = "Python implementation of the game of chess."
+category = "main"
+optional = false
+python-versions = ">=3.8,<4.0"
+
+[[package]]
+name = "pyglet"
+version = "1.5.27"
+description = "Cross-platform windowing and multimedia library"
+category = "main"
+optional = false
+python-versions = "*"
+
+[metadata]
+lock-version = "1.1"
+python-versions = "^3.8"
+content-hash = "38a99c3ed126812212dc840597673c3d15bdd7f716b1a3f59516dacf629ad337"
+
+[metadata.files]
+chess-python-pip = [
+    {file = "chess-python-pip-0.1.6.tar.gz", hash = "sha256:886dfdc9daa58a5724aac2fecb82c0c2fd5dc1772f95b83df8ebc95e7056845f"},
+    {file = "chess_python_pip-0.1.6-py3-none-any.whl", hash = "sha256:7b90321c1968a6653cd49bb5dd1692990dbee90c7c7a5ff73f4e9dade6fa4959"},
+]
+pyglet = [
+    {file = "pyglet-1.5.27-py3-none-any.whl", hash = "sha256:7ce2eb5a299cda92fcc099f533520cdaa2f157a175d6c1442a2ae4d769284d2d"},
+    {file = "pyglet-1.5.27.zip", hash = "sha256:4d00e067451f3b10fd51b69764fddab65444372a2da344ee2b35f0a8e6ebf005"},
+]
