@@ -3,7 +3,7 @@ from typing import Tuple
 import pyglet
 from chess_python.chess import Chess
 
-from src.classical_agent.agent import Agent
+from chess_ai.classical_agent.agent import Agent
 
 W = H = 480
 PIECE_IMAGE_DICT = {

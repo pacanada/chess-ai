@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "chess-ai"
+version = "0.1.0"
+description = ""
+authors = ["pacanada <pereirapcanada@gmail.com>"]
+readme = "README.md"
+packages = [{include = "chess_ai"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+chess-python-pip = "^0.1.6"
+pyglet = "^1.5.27"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

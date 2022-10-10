@@ -2,7 +2,7 @@ import time
 
 from agent import Agent
 from chess_python.chess import Chess
-from src.evaluation.utils import FEN_POSITIONS, evaluate_move
+from chess_ai.evaluation.utils import FEN_POSITIONS, evaluate_move
 
 # depth 4 3.93 / 3.65
 # depth 3 2.86 / 2.79
