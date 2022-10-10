@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "chess-ai"
+name = "chess-ai-pip"
 version = "0.1.0"
 description = ""
 authors = ["pacanada <pereirapcanada@gmail.com>"]
