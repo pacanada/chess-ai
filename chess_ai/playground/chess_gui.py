@@ -155,9 +155,10 @@ class ChessBoard(pyglet.window.Window):
             print(f"Corresponding to index: {self.pos_i}")
 
     def handle_opponent_turn(self):
-        self.make_opponenet_move()
-        self.game.update_outcome()
-        self.draw_result()
+        if self.game.result is None:
+            self.make_opponent_move()
+            self.game.update_outcome()
+            self.draw_result()
 
     def on_mouse_release(self, x, y, button, modifiers):
         if DEBUG:
@@ -171,7 +172,7 @@ class ChessBoard(pyglet.window.Window):
                 f"Moused dragging {x=}, {y=},{dx=}, {dy=}, {buttons=}, {modifiers=}",
             )
 
-    def make_opponenet_move(self):
+    def make_opponent_move(self):
 
         game_copy = deepcopy(self.game)
         agent = Agent(

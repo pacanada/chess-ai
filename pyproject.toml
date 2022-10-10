@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chess-ai-pip"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["pacanada <pereirapcanada@gmail.com>"]
 readme = "README.md"
