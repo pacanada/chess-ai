@@ -1,20 +1,25 @@
 # ChessAI
 
-Attempt to create a decent adversary to play chess against. The game implementation used for the agents in this project is another personal project [chess_python](https://github.com/pacanada/chess-python)
+Attempt to create a decent adversary to play chess against. The game implementation used for the
+agents in this project is another personal project
+[chess_python](https://github.com/pacanada/chess-python)
 
 Run the (very basic) GUI with:
+
 ```cmd
 python -m src.playground.chess_gui
 ```
+
 <img src="docs/screenshot_2.png" width="380" height="400">
 <img src="docs/screenshot_1.png" width="380" height="400">
 
 ## Plan
+
 **Classical engine**:
 
-- [X] Create "decent" agent with alpha beta pruning and minimax
-- [X] Implement Move ordering
-- [X] Implement transpositions (caching)
+- [x] Create "decent" agent with alpha beta pruning and minimax
+- [x] Implement Move ordering
+- [x] Implement transpositions (caching)
 - [ ] Implement Iterative deepening search
 
 This classical engine is limited by the performance of the chess game implementation (heavily)
@@ -26,21 +31,20 @@ This classical engine is limited by the performance of the chess game implementa
 
 **Evaluation of agent strenght**:
 
-Come up with a simple strength evaluator strategy that can be used to measure progress for the DL agent and 
-baseline for classical engine agent.
+Come up with a simple strength evaluator strategy that can be used to measure progress for the DL
+agent and baseline for classical engine agent.
 
 1. Choose an arbitrary number of positions
 2. Run them through an engine (stockfish) and rank all posible moves (from best to worst)
 3. Compare chosen move from agent to the list of moves from the engine
-4. Assign score based on how good is the agent choice, if agent choice is more than one (same evaluation for different positions) take the best
+4. Assign score based on how good is the agent choice, if agent choice is more than one (same
+   evaluation for different positions) take the best
 5. Sum the score
-
 
 **UI**
 
-Important for testing
-TODO:
+Important for testing TODO:
 
- - [X] Basic UI
- - [ ] Play also as black inverting board
- - [ ] Allow args when launching the GUI (depth, agent type, fen)
+- [x] Basic UI
+- [ ] Play also as black inverting board
+- [ ] Allow args when launching the GUI (depth, agent type, fen)
