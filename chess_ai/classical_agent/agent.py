@@ -36,9 +36,17 @@ class ClassicEvaluator:
         # Simple count
         base_evaluation = sum([PIECE_VALUES[piece] for piece in state.board])
         # pawn positions (-0.1 for each double, isolated or blocked)
-        white_pawns_blocked = [piece for pos, piece in enumerate(state.board) if piece==1 and state.board[pos+8]!=0]
-        black_pawns_blocked = [piece for pos, piece in enumerate(state.board) if piece==-1 and state.board[pos-8]!=0]
-        base_evaluation+=-0.2*len(white_pawns_blocked)+0.2*len(black_pawns_blocked)
+        white_pawns_blocked = [
+            piece
+            for pos, piece in enumerate(state.board)
+            if piece == 1 and state.board[pos + 8] != 0
+        ]
+        black_pawns_blocked = [
+            piece
+            for pos, piece in enumerate(state.board)
+            if piece == -1 and state.board[pos - 8] != 0
+        ]
+        base_evaluation += -0.2 * len(white_pawns_blocked) + 0.2 * len(black_pawns_blocked)
         return base_evaluation
 
 
@@ -115,8 +123,8 @@ class Agent:
             self.nodes_visited += 1
             value = ClassicEvaluator().evaluate(node.state)
             if self.use_transpositions:
-                    # having the value cached for the leaf nodes does not help much since the evaluator
-                    # is not very expensive
+                # having the value cached for the leaf nodes does not help much since the evaluator
+                # is not very expensive
                 self.transpositions[0][node_hash] = value
             return value
 
@@ -156,7 +164,7 @@ class Agent:
 
     def recommend(self, node: Chess, order: bool = False, random_flag=False):
         if random_flag:
-            #sanity check
+            # sanity check
             legal_moves = node.legal_moves()
             return [(random.choice(legal_moves), "", "")]
 

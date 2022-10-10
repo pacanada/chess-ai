@@ -1,4 +1,5 @@
 from copy import deepcopy
+
 from chess_python.chess import Chess, ChessUtils
 
 from chess_ai.classical_agent.agent import Agent
@@ -41,7 +42,6 @@ def main():
             )
 
             recommended_moves = agent.recommend(node=game_copy, order=True, random_flag=False)
-
 
             # in case there are several moves with same value
             best_move = recommended_moves[0][0]
