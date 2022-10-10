@@ -7,7 +7,8 @@ agents in this project is another personal project
 Run the (very basic) GUI with:
 
 ```cmd
-python -m src.playground.chess_gui
+pip install chessa-ai-pip
+python -m chess_ai.playground.chess_gui
 ```
 
 <img src="docs/screenshot_2.png" width="380" height="400">
