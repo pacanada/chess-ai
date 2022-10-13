@@ -141,6 +141,7 @@ class ChessBoard(pyglet.window.Window):
 
                 except ValueError as e:
                     print("Error: Invalid move", e)
+                    return None
                 self.draw_sprites_from_board()
                 self.allowed_moves_in_pos = []
                 self.pos_i = None
