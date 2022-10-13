@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chess-ai-pip"
-version = "0.1.1"
+version = "0.1.2"
 description = ""
 authors = ["pacanada <pereirapcanada@gmail.com>"]
 readme = "README.md"
@@ -8,7 +8,7 @@ packages = [{include = "chess_ai"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-chess-python-pip = "^0.1.7"
+chess-python-pip = "^0.1.8"
 pyglet = "^1.5.27"
 
 

@@ -128,8 +128,6 @@ class ChessBoard(pyglet.window.Window):
             self.draw_allowed_moves()
         elif self.pos_i is not None:
             if self.game.state.board[from_coord_to_index(x, y)] * self.game.state.turn > 0:
-                # reselecting one square of friendly piece
-                self.pos_i = from_coord_to_index(x, y)
                 self.allowed_moves_in_pos = self.game.legal_moves_in_position(pos=self.pos_i)
                 self.draw_allowed_moves()
             else:
@@ -138,11 +136,14 @@ class ChessBoard(pyglet.window.Window):
                     self.game.move(move=[self.pos_i, self.pos_f, None], check_allowed_moves=True)
                     self.game.update_outcome()
                     self.draw_result()
+                    self.draw_sprites_from_board()
 
                 except ValueError as e:
                     print("Error: Invalid move", e)
+                    self.allowed_moves_in_pos = []
+                    self.pos_i = None
+                    self.pos_f = None
                     return None
-                self.draw_sprites_from_board()
                 self.allowed_moves_in_pos = []
                 self.pos_i = None
                 self.pos_f = None
