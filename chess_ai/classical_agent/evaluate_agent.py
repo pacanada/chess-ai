@@ -1,7 +1,7 @@
 import time
 
-from agent import Agent
 from chess_python.chess import Chess
+from classical_agent.agent import Agent
 
 from chess_ai.evaluation.utils import FEN_POSITIONS, evaluate_move
 
