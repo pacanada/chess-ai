@@ -22,7 +22,7 @@ python-versions = ">=3.6.1"
 
 [[package]]
 name = "chess-python-pip"
-version = "0.1.6"
+version = "0.1.8"
 description = "Python implementation of the game of chess."
 category = "main"
 optional = false
@@ -241,7 +241,7 @@ testing = ["coverage (>=6.2)", "coverage-enable-subprocess (>=1)", "flaky (>=3.7
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "7874b7ebebb85fba0ef2f8c3493a1a5066f22f5743a60b701ba4b073f70f6c77"
+content-hash = "091a23ce14633177abf207e02bcda12a678af5a6a5780a37c10d0c55a217afdc"
 
 [metadata.files]
 attrs = [
@@ -253,8 +253,8 @@ cfgv = [
     {file = "cfgv-3.3.1.tar.gz", hash = "sha256:f5a830efb9ce7a445376bb66ec94c638a9787422f96264c98edc6bdeed8ab736"},
 ]
 chess-python-pip = [
-    {file = "chess-python-pip-0.1.6.tar.gz", hash = "sha256:886dfdc9daa58a5724aac2fecb82c0c2fd5dc1772f95b83df8ebc95e7056845f"},
-    {file = "chess_python_pip-0.1.6-py3-none-any.whl", hash = "sha256:7b90321c1968a6653cd49bb5dd1692990dbee90c7c7a5ff73f4e9dade6fa4959"},
+    {file = "chess_python_pip-0.1.8-py3-none-any.whl", hash = "sha256:f2ffd7a33b61a035c2bc0868ba2738e44cc6865018c89433a7a2c89ad759b546"},
+    {file = "chess_python_pip-0.1.8.tar.gz", hash = "sha256:136994ef404090b9c8ac3eec2f01a70c7df58503198d21bd3aca59a9c810bb76"},
 ]
 colorama = [
     {file = "colorama-0.4.5-py2.py3-none-any.whl", hash = "sha256:854bf444933e37f5824ae7bfc1e98d5bce2ebe4160d46b5edf346a89358e99da"},
