@@ -1,11 +1,13 @@
 from copy import deepcopy
 import pickle
 import random
+import numpy as np
 import pandas as pd
 from typing import List
 from chess_python.chess import State, Chess
-from sklearn import feature_selection
 from sklearn.neural_network import MLPRegressor
+
+from chess_ai.evaluation.utils import FEN_POSITIONS, evaluate_move
 
 def encode_state_to_bits(state:State):
     # board: 64*7figures*color ie: white pawn 0001 black pawn 1001
@@ -53,15 +55,12 @@ class Agent:
 
     def evaluate_position(self, state):
 
-        self.model.predict(encode_state(state))
-        #else:
-
-        # # not implemented
-        #    return random.random()*100-50
+        #return self.model.predict(np.array(encode_state(state)).reshape(1, -1))
+        return self.model.predict(pd.DataFrame([encode_state(state)], columns=self.model.feature_names_in_))
 
     def recommend(self, random_move=False):
         if random_move:
-            return random.choice(self.game.legal_moves())
+            return [(random.choice(self.game.legal_moves()), 0)]
         list_moves = []
         for move in self.game.legal_moves():
             game_copied = deepcopy(self.game)
@@ -69,7 +68,7 @@ class Agent:
             list_moves.append((move, value))
 
         list_moves = sorted(list_moves, key=lambda item: item[1], reverse=self.color == 1)
-        return list_moves[0][0]
+        return list_moves
 
 class Simulation:
     """Take two agents, and run a game, storing the buffer of gameplay"""
@@ -79,12 +78,21 @@ class Simulation:
         self.game = Chess()
         self.model = model
     def run(self):
-        while self.game.result is None:
-            recommended_move = Agent(color=self.game.state.turn, game=self.game, model=self.model).recommend()
-            self.game.move(recommended_move)
-            self.game.update_outcome()
-            self.buffer.append((deepcopy(self.game.state), encode_state(self.game.state), recommended_move))
-        self.outcome = self.game.result
+        cont = 0
+        try:
+            while self.game.result is None:
+                random_move = True if cont%1==0 else False
+                recommended_move = Agent(color=self.game.state.turn, game=self.game, model=self.model).recommend(random_move)[0][0]
+                self.game.move(recommended_move)
+                self.game.update_outcome()
+                self.buffer.append((deepcopy(self.game.state), encode_state(self.game.state), recommended_move))
+                cont +=1
+            self.outcome = self.game.result
+        except:
+            with open(f"bug_simulation.pickle", "wb") as f:
+           # avoid api key to be serialized
+                pickle.dump(self, f)
+
 
 
 class Trainer:
@@ -93,38 +101,87 @@ class Trainer:
         self.feature_columns = [f"x_{i}" for i in range(67)]
         dummy_dataset = pd.DataFrame([[0]*67], columns=self.feature_columns)
         dummy_dataset["y"] = 0
-        self.model = MLPRegressor(hidden_layer_sizes=(10,10), warm_start=True).fit(dummy_dataset[self.feature_columns], dummy_dataset["y"]) if model is None else model
+        self.model = MLPRegressor(hidden_layer_sizes=(10,10),tol=1e-6, max_iter=100, n_iter_no_change=100, learning_rate_init=0.001, warm_start=True, verbose=False).fit(dummy_dataset[self.feature_columns], dummy_dataset["y"]) if model is None else model
         self.n_sim = n_sim
         self.buffer = pd.DataFrame()
 
     def process_buffer(self, buffer_raw:List[List], result):
         df_buffer_per_sim = pd.DataFrame([row[1] for row in buffer_raw], columns=self.feature_columns)
         # not clever, just for debugging
-        df_buffer_per_sim["y"] = result*100
+        df_buffer_per_sim["y"] = np.linspace(0,1,df_buffer_per_sim.shape[0])*10*result
         return df_buffer_per_sim
 
     def run_simulations(self):
         for i in range(self.n_sim):
             sim = Simulation(self.model)
             sim.run()
-
             # process buffer and append
-            buffer_per_sim = self.process_buffer(buffer_raw=sim.buffer, result=sim.outcome)
-            self.buffer = pd.concat([self.buffer, buffer_per_sim])
+            if sim.outcome!=0:
+                buffer_per_sim = self.process_buffer(buffer_raw=sim.buffer, result=sim.outcome)
+                self.buffer = pd.concat([self.buffer, buffer_per_sim])
+
     def train(self):
         self.model.fit(X=self.buffer[self.feature_columns], y= self.buffer["y"])
 
+    def evaluate(self):
+        all_evals = []
+        for fen_pos in FEN_POSITIONS:
+            chess = Chess(fen_pos)
+            # something is wrong with transpositions
+            recommended_moves = Agent(color=chess.state.turn, game=chess, model=self.model).recommend()
 
+            # in case there are several moves with same value
+            best_value = recommended_moves[0][1]
+            best_moves = [move[0] for move in recommended_moves if move[1] == best_value]
+            
+            evaluations = []
+
+            for move in best_moves:
+                evaluations.append(evaluate_move(fen_pos, move))
+            evaluation_avg = sum(evaluations) / len(evaluations)
+            all_evals.append(evaluation_avg)
+
+        print(f"Overall score {sum(all_evals)/len(all_evals)}")
+        return sum(all_evals)/len(all_evals)
 
 
 if __name__=="__main__":
+    with open("bug_simulation.pickle", "rb") as f:
+        simulation = pickle.load(f)
+    try:
+        with open("chess_trainer.pickle", "rb") as f:
+            model = pickle.load(f)
+        print("loaded_model")
+    except:
+        model = None
+    
+    list_evaluations = []
+    for i in range(20):
+        print("it", i)
 
-        trainer = Trainer(3)
+        trainer = Trainer(n_sim=40, model=model)
+
         trainer.run_simulations()
+
+
         trainer.train()
+        # summary 
+        print("Number of rows in the buffer", trainer.buffer.shape[0])
+
         with open(f"chess_trainer.pickle", "wb") as f:
-            # avoid api key to be serialized
-            pickle.dump(trainer, f)
+           pickle.dump(trainer.model, f)
+        if i%1==0:
+            evaluation = trainer.evaluate()
+            list_evaluations.append(evaluation)
+            if evaluation>4:
+                with open(f"model_4.pickle", "wb") as f:
+                    pickle.dump(trainer.model, f)
+
+
+    print(list_evaluations)
+    with open("list_evaluations.pickle", "wb") as fp:   #Pickling
+        pickle.dump(list_evaluations, fp)
+
 
         
 

@@ -1,7 +1,7 @@
 import time
 
 from chess_python.chess import Chess
-from classical_agent.agent import Agent
+from chess_ai.classical_agent.agent import Agent
 
 from chess_ai.evaluation.utils import FEN_POSITIONS, evaluate_move
 
@@ -18,7 +18,7 @@ def test_engine():
         chess = Chess(fen_pos)
         # something is wrong with transpositions
         agent = Agent(
-            depth=2,
+            depth=1,
             color=chess.state.turn,
             alpha_beta=True,
             move_ordering=True,

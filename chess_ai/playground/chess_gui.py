@@ -1,10 +1,15 @@
 from copy import deepcopy
+import pickle
 from typing import List, Tuple
 
 import pyglet
 from chess_python.chess import Chess
 
-from chess_ai.classical_agent.agent import Agent
+#from chess_ai.classical_agent.agent import Agent
+from chess_ai.rlagent.agent import Agent
+
+with open("model_3.pickle", "rb") as f:
+    model = pickle.load(f)
 
 W = H = 480
 PIECE_IMAGE_DICT = {
@@ -178,15 +183,17 @@ class ChessBoard(pyglet.window.Window):
     def make_opponent_move(self):
 
         game_copy = deepcopy(self.game)
-        agent = Agent(
-            depth=3,  # actually is 4
-            color=game_copy.state.turn,
-            alpha_beta=True,
-            move_ordering=True,
-            use_transpositions=True,
-        )
+        # agent = Agent(
+        #     depth=3,  # actually is 4
+        #     color=game_copy.state.turn,
+        #     alpha_beta=True,
+        #     move_ordering=True,
+        #     use_transpositions=True,
+        # )
 
-        recommended_moves = agent.recommend(node=game_copy, order=True, random_flag=False)
+        # recommended_moves = agent.recommend(node=game_copy, order=True, random_flag=False)
+        recommended_moves = Agent(color=game_copy.state.turn, game=game_copy, model=model).recommend()
+        
 
         # in case there are several moves with same value
         best_move = recommended_moves[0][0]
