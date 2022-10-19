@@ -134,11 +134,17 @@ class ChessBoard(pyglet.window.Window):
                 self.draw_allowed_moves()
             else:
                 self.pos_f = from_coord_to_index(x, y)
-                promotion = "q" if  abs(self.game.state.board[self.pos_i]) == 1 and self.pos_f//8 in [0,7] else None
+                promotion = (
+                    "q"
+                    if abs(self.game.state.board[self.pos_i]) == 1 and self.pos_f // 8 in [0, 7]
+                    else None
+                )
 
                 try:
-                    
-                    self.game.move(move=[self.pos_i, self.pos_f, promotion], check_allowed_moves=True)
+
+                    self.game.move(
+                        move=[self.pos_i, self.pos_f, promotion], check_allowed_moves=True
+                    )
                     self.game.update_outcome()
                     self.draw_result()
                     self.draw_sprites_from_board()
