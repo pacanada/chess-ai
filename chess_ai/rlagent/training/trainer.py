@@ -79,19 +79,15 @@ class Simulation:
         self.model = model
     def run(self):
         cont = 0
-        try:
-            while self.game.result is None:
-                random_move = True if cont%1==0 else False
-                recommended_move = Agent(color=self.game.state.turn, game=self.game, model=self.model).recommend(random_move)[0][0]
-                self.game.move(recommended_move)
-                self.game.update_outcome()
-                self.buffer.append((deepcopy(self.game.state), encode_state(self.game.state), recommended_move))
-                cont +=1
-            self.outcome = self.game.result
-        except:
-            with open(f"bug_simulation.pickle", "wb") as f:
-           # avoid api key to be serialized
-                pickle.dump(self, f)
+
+        while self.game.result is None:
+            random_move = True if cont%3==0 else False
+            recommended_move = Agent(color=self.game.state.turn, game=self.game, model=self.model).recommend(random_move)[0][0]
+            self.game.move(recommended_move)
+            self.game.update_outcome()
+            self.buffer.append((deepcopy(self.game.state), encode_state(self.game.state), recommended_move))
+            cont +=1
+        self.outcome = self.game.result
 
 
 
@@ -101,9 +97,10 @@ class Trainer:
         self.feature_columns = [f"x_{i}" for i in range(67)]
         dummy_dataset = pd.DataFrame([[0]*67], columns=self.feature_columns)
         dummy_dataset["y"] = 0
-        self.model = MLPRegressor(hidden_layer_sizes=(10,10),tol=1e-6, max_iter=100, n_iter_no_change=100, learning_rate_init=0.001, warm_start=True, verbose=False).fit(dummy_dataset[self.feature_columns], dummy_dataset["y"]) if model is None else model
+        self.model = MLPRegressor(hidden_layer_sizes=(100,50,10),tol=1e-6, max_iter=300, n_iter_no_change=1e5, learning_rate_init=0.001, warm_start=True, verbose=True).fit(dummy_dataset[self.feature_columns], dummy_dataset["y"]) if model is None else model
         self.n_sim = n_sim
         self.buffer = pd.DataFrame()
+       
 
     def process_buffer(self, buffer_raw:List[List], result):
         df_buffer_per_sim = pd.DataFrame([row[1] for row in buffer_raw], columns=self.feature_columns)
@@ -112,13 +109,16 @@ class Trainer:
         return df_buffer_per_sim
 
     def run_simulations(self):
+        self.num_non_draw = 0
         for i in range(self.n_sim):
             sim = Simulation(self.model)
             sim.run()
             # process buffer and append
-            if sim.outcome!=0:
-                buffer_per_sim = self.process_buffer(buffer_raw=sim.buffer, result=sim.outcome)
-                self.buffer = pd.concat([self.buffer, buffer_per_sim])
+            #if sim.outcome!=0:
+            self.num_non_draw+= 1 if sim.outcome!=0 else 0 
+            buffer_per_sim = self.process_buffer(buffer_raw=sim.buffer, result=sim.outcome)
+            self.buffer = pd.concat([self.buffer, buffer_per_sim])
+        print(f"{self.num_non_draw=}")
 
     def train(self):
         self.model.fit(X=self.buffer[self.feature_columns], y= self.buffer["y"])
@@ -146,20 +146,18 @@ class Trainer:
 
 
 if __name__=="__main__":
-    with open("bug_simulation.pickle", "rb") as f:
-        simulation = pickle.load(f)
-    try:
-        with open("chess_trainer.pickle", "rb") as f:
-            model = pickle.load(f)
-        print("loaded_model")
-    except:
-        model = None
+    model=None
     
     list_evaluations = []
     for i in range(20):
+        try:
+            with open("model.pickle", "rb") as f:
+                model = pickle.load(f)
+        except:
+            print("Model not found, initializing")
         print("it", i)
 
-        trainer = Trainer(n_sim=40, model=model)
+        trainer = Trainer(n_sim=20, model=model)
 
         trainer.run_simulations()
 
@@ -168,7 +166,7 @@ if __name__=="__main__":
         # summary 
         print("Number of rows in the buffer", trainer.buffer.shape[0])
 
-        with open(f"chess_trainer.pickle", "wb") as f:
+        with open(f"model.pickle", "wb") as f:
            pickle.dump(trainer.model, f)
         if i%1==0:
             evaluation = trainer.evaluate()
