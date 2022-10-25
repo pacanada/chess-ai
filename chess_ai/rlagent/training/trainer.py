@@ -81,7 +81,7 @@ class Simulation:
         cont = 0
 
         while self.game.result is None:
-            random_move = True if cont%3==0 else False
+            random_move = True if cont%2==0 else False
             recommended_move = Agent(color=self.game.state.turn, game=self.game, model=self.model).recommend(random_move)[0][0]
             self.game.move(recommended_move)
             self.game.update_outcome()
@@ -97,7 +97,7 @@ class Trainer:
         self.feature_columns = [f"x_{i}" for i in range(67)]
         dummy_dataset = pd.DataFrame([[0]*67], columns=self.feature_columns)
         dummy_dataset["y"] = 0
-        self.model = MLPRegressor(hidden_layer_sizes=(100,50,10),tol=1e-6, max_iter=300, n_iter_no_change=1e5, learning_rate_init=0.001, warm_start=True, verbose=True).fit(dummy_dataset[self.feature_columns], dummy_dataset["y"]) if model is None else model
+        self.model = MLPRegressor(hidden_layer_sizes=(50,10),tol=1e-6, max_iter=300, n_iter_no_change=1e5, learning_rate_init=0.001, warm_start=True, verbose=True).fit(dummy_dataset[self.feature_columns], dummy_dataset["y"]) if model is None else model
         self.n_sim = n_sim
         self.buffer = pd.DataFrame()
        
@@ -105,7 +105,8 @@ class Trainer:
     def process_buffer(self, buffer_raw:List[List], result):
         df_buffer_per_sim = pd.DataFrame([row[1] for row in buffer_raw], columns=self.feature_columns)
         # not clever, just for debugging
-        df_buffer_per_sim["y"] = np.linspace(0,1,df_buffer_per_sim.shape[0])*10*result
+        df_buffer_per_sim["y"] = result 
+        # np.linspace(0,1,df_buffer_per_sim.shape[0])*10*result
         return df_buffer_per_sim
 
     def run_simulations(self):
@@ -149,7 +150,7 @@ if __name__=="__main__":
     model=None
     
     list_evaluations = []
-    for i in range(20):
+    for i in range(10):
         try:
             with open("model.pickle", "rb") as f:
                 model = pickle.load(f)
@@ -157,7 +158,7 @@ if __name__=="__main__":
             print("Model not found, initializing")
         print("it", i)
 
-        trainer = Trainer(n_sim=20, model=model)
+        trainer = Trainer(n_sim=50, model=model)
 
         trainer.run_simulations()
 
