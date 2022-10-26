@@ -6,7 +6,7 @@ import math
 import random
 import numpy as np
 from typing import Dict, List, Tuple
-from chess_python.chess import State, Chess
+from chess_python.chess import State, Chess, Optimizer
 
 SQUARES = [file+str(rank+1) for file in "abcdefgh" for rank in range(8)]
 
@@ -29,7 +29,7 @@ class Policy:
 
 class NN:
     def predict(self, s:State)->Tuple[float, list]:
-        v = np.random.rand(1)[0]
+        v = np.random.rand(1)[0]*2-1 # (-1,1)
         p = np.random.rand(A)
         return v, p
 
@@ -39,15 +39,13 @@ class MCTS:
     def __init__(self, n_sim: int, nn:NN, game:Chess):
         self.c = 1/3
         self.n_sim = n_sim
-        #self.state = deepcopy(state)
         self.nn = nn
-        self.game = deepcopy(game)
+        self.game = game #deepcopy(game)
         self.N: Dict[State, list]= {} # number of times a action is chosen
         self.P: Dict[State, list] = {}
         self.Q: Dict[State, list] = {}
         self.visited: List[list] = []
     def search(self, nn: NN, game:Chess)->float:
-        game = deepcopy(game)
         s = hash(game.state)
         if game.result is not None:
             return -game.result
@@ -67,32 +65,35 @@ class MCTS:
                 best_a = a
         a = best_a
         game = game.move(MOVES[a])
-        #sp = deepcopy(game.state)
         game.update_outcome()
         v = self.search( nn=nn, game=game)
-        # if s==-3582058274095339647:
-
-        #     print(MOVES[a])
-        #     print("here")
         self.Q[s][a] = (self.N[s][a]*self.Q[s][a] + v)/(self.N[s][a]+1)
         self.N[s][a] += 1
         return -v
         
     def run(self):
         for _ in range(self.n_sim):
-            self.search(nn=self.nn, game=deepcopy(self.game))
-            #print(hash(self.state))
+            game = deepcopy(self.game)
+            self.search(nn=self.nn, game=game)
 
 if __name__=="__main__":
     nn = NN()
-    # v, p = nn.predict(1)
-    # print(v, p)
-    game = Chess()
-    mcts =MCTS( n_sim=1000, nn=nn, game=game)
-    mcts.run()
-    print(mcts)
-    print(game)
+    buffer = []
+    game = Chess() #.move("e2e4")
+    while True:
+
+
+
+        mcts =MCTS( n_sim=800, nn=nn, game=game)
+        mcts.run()
+        max_value = max(mcts.Q[hash(game.state)])
+        index_move = mcts.Q[hash(game.state)].index(max_value)
+
+    # not visited actions are Q=0
+    # Q_inf_for_neg = [a if a!=0 else -float("inf") for a in mcts.Q[hash(game.state)]]
+    #max_value = max(Q_inf_for_neg)
     max_value = max(mcts.Q[hash(game.state)])
     index_move = mcts.Q[hash(game.state)].index(max_value)
+    print("game state", hash(game.state))
     print("For first state", MOVES[index_move])
     print("bla")
