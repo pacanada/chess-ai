@@ -1,3 +1,6 @@
+from typing import List
+from chess_python.chess import State
+
 def get_en_passant_index_offset(en_passant_allowed: List[int])-> int:
     """Transform from en_passant encoding used in chess.state to simple 0 to 16 encoding. 0 nothing,
     1-8 white rank 3 and 9-16 black rank 5"""

@@ -4,9 +4,12 @@
 from copy import deepcopy
 import math
 import random
+import pandas as pd
 import numpy as np
 from typing import Dict, List, Tuple
 from chess_python.chess import State, Chess, Optimizer
+
+from chess_ai.rlagent.muzero.utils import encode_state
 
 SQUARES = [file+str(rank+1) for file in "abcdefgh" for rank in range(8)]
 
@@ -18,14 +21,17 @@ MOVES = [i+f for i in SQUARES for f in SQUARES if i!=f]+[move+promotion for move
 
 
 
-print(len(MOVES))
-
-
 A = len(MOVES)
 
-class Policy:
-    def __init__(self):
-        self.P = [0]*A
+def process_buffer(result: int, buffer: List):
+    df = pd.DataFrame(buffer, columns=["state", "policy", "player"])
+    if result == 0:
+        df["value"] = 0
+    else:
+        df["value"] = result*df["player"]
+    return df
+
+
 
 class NN:
     def predict(self, s:State)->Tuple[float, list]:
@@ -76,24 +82,48 @@ class MCTS:
             game = deepcopy(self.game)
             self.search(nn=self.nn, game=game)
 
-if __name__=="__main__":
+
+def run_episode():
     nn = NN()
     buffer = []
     game = Chess() #.move("e2e4")
+    count = 0
     while True:
-
-
-
-        mcts =MCTS( n_sim=800, nn=nn, game=game)
+        mcts = MCTS( n_sim=20, nn=nn, game=game)
         mcts.run()
-        max_value = max(mcts.Q[hash(game.state)])
-        index_move = mcts.Q[hash(game.state)].index(max_value)
+        s = hash(game.state)
+        sum_N = sum(mcts.N[s])
+        P = [n/sum_N for n in mcts.N[s]]
+        buffer.append([encode_state(game.state), P, game.state.turn])
+        # When all are negative reward, it chooses the first move a1a2 because it cannot find a 
+        # winning move. We remove the non explored actions by giving -inf
+        Q_inf_for_neg = [a if a!=0 else -float("inf") for a in mcts.Q[s]]
+        max_value = max(Q_inf_for_neg)
+        #max_value = max(mcts.Q[s])
+        index_move = mcts.Q[s].index(max_value)
+        suggested_move = MOVES[index_move]
+        #print(game)
+        print(count, "Suggested move", suggested_move)
+        count+=1
+        game=game.move(suggested_move)
+        game.update_outcome()
+        if game.result is not None:
+            print(game.result)
+            print(game)
+            return process_buffer(game.result, buffer)
+if __name__=="__main__":
+    buffer_df = pd.DataFrame()
+    for i in range(2):
+        buffer_df_episode = run_episode()
+        buffer_df_episode["episode"] = i
+        buffer_df = pd.concat([buffer_df, buffer_df_episode])
+    buffer_df.to_csv("buffer.csv")
 
     # not visited actions are Q=0
     # Q_inf_for_neg = [a if a!=0 else -float("inf") for a in mcts.Q[hash(game.state)]]
     #max_value = max(Q_inf_for_neg)
-    max_value = max(mcts.Q[hash(game.state)])
-    index_move = mcts.Q[hash(game.state)].index(max_value)
-    print("game state", hash(game.state))
-    print("For first state", MOVES[index_move])
-    print("bla")
+    # max_value = max(mcts.Q[hash(game.state)])
+    # index_move = mcts.Q[hash(game.state)].index(max_value)
+    # print("game state", hash(game.state))
+    # print("For first state", MOVES[index_move])
+    # print("bla")
