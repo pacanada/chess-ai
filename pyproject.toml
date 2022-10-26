@@ -8,7 +8,7 @@ packages = [{include = "chess_ai"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-chess-python-pip = "^0.1.7"
+chess-python-pip = "^0.1.12"
 pyglet = "^1.5.27"
 
 
