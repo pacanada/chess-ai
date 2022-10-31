@@ -73,7 +73,7 @@ class MCTS:
         game = game.move(MOVES[a])
         game.update_outcome()
         v = self.search( nn=nn, game=game)
-        self.Q[s][a] = (self.N[s][a]*self.Q[s][a] + v)/(self.N[s][a]+1)
+        self.Q[s][a] = (self.N[s][a]*self.Q[s][a] + v)/(1+self.N[s][a])
         self.N[s][a] += 1
         return -v
         
@@ -89,10 +89,11 @@ def run_episode():
     game = Chess() #.move("e2e4")
     count = 0
     while True:
-        mcts = MCTS( n_sim=20, nn=nn, game=game)
+        mcts = MCTS( n_sim=10, nn=nn, game=game)
         mcts.run()
         s = hash(game.state)
         sum_N = sum(mcts.N[s])
+        # actual policy
         P = [n/sum_N for n in mcts.N[s]]
         buffer.append([encode_state(game.state), P, game.state.turn])
         # When all are negative reward, it chooses the first move a1a2 because it cannot find a 
@@ -102,8 +103,7 @@ def run_episode():
         #max_value = max(mcts.Q[s])
         index_move = mcts.Q[s].index(max_value)
         suggested_move = MOVES[index_move]
-        #print(game)
-        print(count, "Suggested move", suggested_move)
+        # print(count, "Suggested move", suggested_move)
         count+=1
         game=game.move(suggested_move)
         game.update_outcome()
@@ -113,7 +113,7 @@ def run_episode():
             return process_buffer(game.result, buffer)
 if __name__=="__main__":
     buffer_df = pd.DataFrame()
-    for i in range(2):
+    for i in range(10):
         buffer_df_episode = run_episode()
         buffer_df_episode["episode"] = i
         buffer_df = pd.concat([buffer_df, buffer_df_episode])
