@@ -1,11 +1,13 @@
+import pickle
 import torch
 import pandas as pd
 import numpy as np
 from chess_ai.rlagent.muzero.models import AlphazeroNet
 from torch.utils.data import Dataset, DataLoader
-EPOCHS = 100
-BATCH_SIZE = 1000
-DEBUG = False
+import matplotlib.pyplot as plt
+EPOCHS = 1000
+BATCH_SIZE = 500
+DEBUG = True
 
 class BufferDataset(Dataset):
     def __init__(self, x, y_value, y_policy):
@@ -28,31 +30,45 @@ def process(buffer: pd.DataFrame):
     y_policy = torch.tensor(buffer["policy"].apply(lambda x: np.array(eval(x))), dtype=torch.float32)
     return X, y_values, y_policy
 
+def loss_policy_f(inputs, targets):
+        return -torch.sum(targets * inputs) / targets.size()[0]
+
 buffer = pd.read_csv("buffer.csv")
+
 if DEBUG:
-    x = None
+    with open("training.pickle", "rb") as f:
+        x, y_value, y_policy  = pickle.load(f)
+    
 else:
     x, y_value, y_policy = process(buffer)
+    with open("training.pickle", "wb") as f:
+        var = (x,y_value,y_policy)
+        pickle.dump(var, f)
 dataset = BufferDataset(x=x,y_value=y_value, y_policy=y_policy)
-train_dataloader = DataLoader(dataset=dataset, shuffle=False, batch_size=BATCH_SIZE)
+train_dataloader = DataLoader(dataset=dataset, shuffle=True, batch_size=BATCH_SIZE)
 model = AlphazeroNet()
-loss_f = torch.nn.MSELoss()
+loss_v_f = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=0)
 model.train()
+loss_list = []
 
 for it in range(EPOCHS):
     #list_3dim = []
     for batch, (x, y_value, y_policy) in enumerate(train_dataloader):
         #X, y = X.to(device), y.to(device)
         optimizer.zero_grad()
-        y_value_pred = model(x)
-        #list_3dim.append(model.encoder(model.flatten(X)))
-        
-        loss = loss_f(y_value_pred, y_value.flatten())
+        y_value_pred, y_policy_pred = model(x)
+        #list_3dim.append(model.encoder(model.flatten(X)))        
+        loss_value = loss_v_f(y_value_pred, y_value)
+        loss_policy = loss_policy_f(y_policy_pred, y_policy)
+        loss = loss_value+loss_policy
         loss.backward()
         optimizer.step()
-    #print(x.mean(), y_value_pred.mean(), y_value.mean())
+    #print(y_value_pred.mean(), y_value.max())
 
-
+    loss_list.append(loss.mean().detach().numpy())
     print(it, loss.mean())
+
+plt.plot(loss_list)
+plt.show()
         
