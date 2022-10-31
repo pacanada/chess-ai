@@ -8,6 +8,8 @@ import pandas as pd
 import numpy as np
 from typing import Dict, List, Tuple
 from chess_python.chess import State, Chess, Optimizer
+import torch
+from chess_ai.rlagent.muzero.models import AlphazeroNet
 
 from chess_ai.rlagent.muzero.utils import encode_state
 
@@ -57,9 +59,11 @@ class MCTS:
             return -game.result
         if s not in self.visited:
             self.visited.append(s)
-            v, self.P[s] = self.nn.predict(game.state)
+            v_model, policy = self.nn(torch.tensor(encode_state(game.state), dtype=torch.float32).view(-1,67)) #self.nn.predict(game.state)
+            self.P[s] = policy.tolist()[0]
             self.N[s] = [0]*A
             self.Q[s] = [0]*A
+            v = v_model.item()
             return -v
 
         max_u, best_a = -float("inf"), -1
@@ -84,7 +88,10 @@ class MCTS:
 
 
 def run_episode():
-    nn = NN()
+    nn = AlphazeroNet()
+    nn.load_state_dict(torch.load("nn.pth"))
+    nn.eval()
+
     buffer = []
     game = Chess() #.move("e2e4")
     count = 0

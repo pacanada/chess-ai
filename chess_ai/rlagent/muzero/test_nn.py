@@ -5,7 +5,7 @@ import numpy as np
 from chess_ai.rlagent.muzero.models import AlphazeroNet
 from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
-EPOCHS = 1000
+EPOCHS = 500
 BATCH_SIZE = 500
 DEBUG = True
 
@@ -68,7 +68,7 @@ for it in range(EPOCHS):
 
     loss_list.append(loss.mean().detach().numpy())
     print(it, loss.mean())
-
+torch.save(model.state_dict(), "nn.pth")
 plt.plot(loss_list)
 plt.show()
         
