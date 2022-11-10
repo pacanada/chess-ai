@@ -36,17 +36,18 @@ class ClassicEvaluator:
         # Simple count
         base_evaluation = sum([PIECE_VALUES[piece] for piece in state.board])
         # pawn positions (-0.1 for each double, isolated or blocked)
-        white_pawns_blocked = [
-            piece
-            for pos, piece in enumerate(state.board)
-            if piece == 1 and state.board[pos + 8] != 0
-        ]
-        black_pawns_blocked = [
-            piece
-            for pos, piece in enumerate(state.board)
-            if piece == -1 and state.board[pos - 8] != 0
-        ]
-        base_evaluation += -0.2 * len(white_pawns_blocked) + 0.2 * len(black_pawns_blocked)
+        # Not considering pawn blocked
+        # white_pawns_blocked = [
+        #     piece
+        #     for pos, piece in enumerate(state.board)
+        #     if piece == 1 and state.board[pos + 8] != 0
+        # ]
+        # black_pawns_blocked = [
+        #     piece
+        #     for pos, piece in enumerate(state.board)
+        #     if piece == -1 and state.board[pos - 8] != 0
+        # ]
+        # base_evaluation += -0.2 * len(white_pawns_blocked) + 0.2 * len(black_pawns_blocked)
         return base_evaluation
 
 

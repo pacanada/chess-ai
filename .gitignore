@@ -3,4 +3,4 @@ prof*.txt
 __pycache__
 *.egg-info
 .DS_Store
-buffer.csv
+*.csv
