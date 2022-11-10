@@ -1,4 +1,3 @@
-from copy import deepcopy
 import pickle
 import random
 import numpy as np
@@ -17,33 +16,46 @@ def encode_state_to_bits(state:State):
     # castling 4 bits
 
     # turn 1 bit (0 white, 1 black)
-    pass
+    return state
 
 
-def get_en_passant_index_offset(en_passant_allowed: List[int])-> int:
+def get_en_passant_index_offset(en_passant_allowed: List[int]) -> int:
     """Transform from en_passant encoding used in chess.state to simple 0 to 16 encoding. 0 nothing,
     1-8 white rank 3 and 9-16 black rank 5"""
-    if len(en_passant_allowed)==0:
+    if len(en_passant_allowed) == 0:
         return 0
     index = en_passant_allowed[0]
-    if index >=16 and index <= 23:
+    if index >= 16 and index <= 23:
         # a3 would be 1
-        return index - 15 
-    if index >=40 and index <= 47:
+        return index - 15
+    if index >= 40 and index <= 47:
         return index - 31
+    raise ValueError("Something went wrong")
+
 
 def get_castling_encoding(c_e: List[int]):
     # {"Q": 0, "K": 1, "q": 2, "k": 3}
-    bit_string = "".join(["1" if 0 in c_e else "0", "1" if 1 in c_e else "0", "1" if 2 in c_e else "0", "1" if 3 in c_e else "0"])
-    #16 for [0,1,2,3] (1111)
+    bit_string = "".join(
+        [
+            "1" if 0 in c_e else "0",
+            "1" if 1 in c_e else "0",
+            "1" if 2 in c_e else "0",
+            "1" if 3 in c_e else "0",
+        ]
+    )
+    # 16 for [0,1,2,3] (1111)
     return int(bit_string, 2)
-
 
 
 def encode_state(state: State):
     # TODO: this is far from efficient, there must be a clever way to encode a chess position for nn
     en_passant_encoding: int = get_en_passant_index_offset(state.en_passant_allowed)
-    encoded_state = state.board+[state.turn]+[en_passant_encoding] + [get_castling_encoding(state.castling_rights)]
+    encoded_state = (
+        state.board
+        + [state.turn]
+        + [en_passant_encoding]
+        + [get_castling_encoding(state.castling_rights)]
+    )
     return encoded_state
 
 
@@ -70,13 +82,16 @@ class Agent:
         list_moves = sorted(list_moves, key=lambda item: item[1], reverse=self.color == 1)
         return list_moves
 
+
 class Simulation:
     """Take two agents, and run a game, storing the buffer of gameplay"""
+
     def __init__(self, model):
         self.buffer = []
         self.outcome = None
         self.game = Chess()
         self.model = model
+
     def run(self):
         cont = 0
 
@@ -93,17 +108,20 @@ class Simulation:
 
 class Trainer:
     """"""
+
     def __init__(self, n_sim: int, model=None):
         self.feature_columns = [f"x_{i}" for i in range(67)]
-        dummy_dataset = pd.DataFrame([[0]*67], columns=self.feature_columns)
+        dummy_dataset = pd.DataFrame([[0] * 67], columns=self.feature_columns)
         dummy_dataset["y"] = 0
         self.model = MLPRegressor(hidden_layer_sizes=(50,10),tol=1e-6, max_iter=300, n_iter_no_change=1e5, learning_rate_init=0.001, warm_start=True, verbose=True).fit(dummy_dataset[self.feature_columns], dummy_dataset["y"]) if model is None else model
         self.n_sim = n_sim
         self.buffer = pd.DataFrame()
        
 
-    def process_buffer(self, buffer_raw:List[List], result):
-        df_buffer_per_sim = pd.DataFrame([row[1] for row in buffer_raw], columns=self.feature_columns)
+    def process_buffer(self, buffer_raw: List[List], result):
+        df_buffer_per_sim = pd.DataFrame(
+            [row[1] for row in buffer_raw], columns=self.feature_columns
+        )
         # not clever, just for debugging
         df_buffer_per_sim["y"] = result 
         # np.linspace(0,1,df_buffer_per_sim.shape[0])*10*result
@@ -188,6 +206,15 @@ if __name__=="__main__":
     
 
 
+    def train(self):
+        self.model.fit(X=self.buffer[self.feature_columns], y=self.buffer["y"])
 
 
+if __name__ == "__main__":
 
+    trainer = Trainer(3)
+    trainer.run_simulations()
+    trainer.train()
+    with open("chess_trainer.pickle", "wb") as f:
+        # avoid api key to be serialized
+        pickle.dump(trainer, f)

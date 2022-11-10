@@ -94,7 +94,7 @@ class ChessBoard(pyglet.window.Window):
         batch_legal_moves.draw()
 
     def draw_result(self):
-        if self.game.result:
+        if self.game.result is not None:
             result_dict = {1: "White wins", -1: "Black wins", 0: "Draw"}
             self.result_label = pyglet.text.Label(
                 result_dict[self.game.result] + "\n Press q to quit.",
@@ -139,8 +139,17 @@ class ChessBoard(pyglet.window.Window):
                 self.draw_allowed_moves()
             else:
                 self.pos_f = from_coord_to_index(x, y)
+                promotion = (
+                    "q"
+                    if abs(self.game.state.board[self.pos_i]) == 1 and self.pos_f // 8 in [0, 7]
+                    else None
+                )
+
                 try:
-                    self.game.move(move=[self.pos_i, self.pos_f, None], check_allowed_moves=True)
+
+                    self.game.move(
+                        move=[self.pos_i, self.pos_f, promotion], check_allowed_moves=True
+                    )
                     self.game.update_outcome()
                     self.draw_result()
                     self.draw_sprites_from_board()
@@ -153,6 +162,7 @@ class ChessBoard(pyglet.window.Window):
                 self.allowed_moves_in_pos = []
                 self.pos_i = None
                 self.pos_f = None
+                self.promotion = None
                 # opponent
                 self.handle_opponent_turn()
 
