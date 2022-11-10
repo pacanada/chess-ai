@@ -76,7 +76,7 @@ class MCTS:
         a = best_a
         game = game.move(MOVES[a])
         game.update_outcome()
-        v = self.search( nn=nn, game=game)
+        v = self.search(nn=nn, game=game)
         self.Q[s][a] = (self.N[s][a]*self.Q[s][a] + v)/(1+self.N[s][a])
         self.N[s][a] += 1
         return -v
@@ -107,9 +107,13 @@ def run_episode():
         # winning move. We remove the non explored actions by giving -inf
         Q_inf_for_neg = [a if a!=0 else -float("inf") for a in mcts.Q[s]]
         max_value = max(Q_inf_for_neg)
-        #max_value = max(mcts.Q[s])
-        index_move = mcts.Q[s].index(max_value)
-        suggested_move = MOVES[index_move]
+        if max_value==-float("inf"):
+            print("chosing random move")
+            suggested_move = random.choice(game.legal_moves())
+        else:
+            #max_value = max(mcts.Q[s])
+            index_move = mcts.Q[s].index(max_value)
+            suggested_move = MOVES[index_move]
         # print(count, "Suggested move", suggested_move)
         count+=1
         game=game.move(suggested_move)
