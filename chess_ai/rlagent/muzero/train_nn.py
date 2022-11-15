@@ -7,7 +7,7 @@ from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
 EPOCHS = 500
 BATCH_SIZE = 500
-DEBUG = True
+DEBUG = False
 
 class BufferDataset(Dataset):
     def __init__(self, x, y_value, y_policy):
@@ -33,7 +33,7 @@ def process(buffer: pd.DataFrame):
 def loss_policy_f(inputs, targets):
         return -torch.sum(targets * inputs) / targets.size()[0]
 
-buffer = pd.read_csv("buffer.csv")
+buffer = pd.read_csv("buffer_1.csv")
 
 if DEBUG:
     with open("training.pickle", "rb") as f:
