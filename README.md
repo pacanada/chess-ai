@@ -49,3 +49,9 @@ Important for testing TODO:
 - [x] Basic UI
 - [ ] Play also as black inverting board
 - [ ] Allow args when launching the GUI (depth, agent type, fen)
+
+
+## ideas:
+Supervised training for initial nn
+Introduce temperature, not only the most visited node
+Evaluate previous nets

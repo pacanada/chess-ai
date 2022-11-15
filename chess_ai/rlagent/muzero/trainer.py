@@ -14,16 +14,15 @@ from chess_ai.rlagent.muzero.models import AlphazeroNet
 from chess_ai.rlagent.muzero.utils import encode_state
 
 SQUARES = [file+str(rank+1) for file in "abcdefgh" for rank in range(8)]
-
-
 PROMOTION_MOVES_STRAIGHT = [file+"7"+file+"8" for file in "abcdefgh"]+[file+"2"+file+"1" for file in "abcdefgh"]
-PROMOTION_MOVES_DIAG = ["a7b8", "b7a8", "b7c8","c7b8", "c7d8", "d7c8", "d7e8", "e7d8", "e7f8", "f7e8", "f7g8", "g7f8", "g7h8", "h7g8"] + ["a2b1", "b2a1", "b2c1","c2b1", "c2d1", "d2c1", "d2e1", "e2d1", "e2f1", "f2g1", "g2f1", "g2h1", "h2g1"]
+PROMOTION_MOVES_DIAG = ["a7b8", "b7a8", "b7c8","c7b8", "c7d8", "d7c8", "d7e8", "e7d8", "e7f8", "f7e8", "f7g8", "g7f8", "g7h8", "h7g8"] + ["a2b1", "b2a1", "b2c1","c2b1", "c2d1", "d2c1", "d2e1", "e2d1", "e2f1", "f2g1", "f2e1", "g2f1", "g2h1", "h2g1"]
 PROMOTION_MOVES = PROMOTION_MOVES_DIAG +PROMOTION_MOVES_STRAIGHT
 MOVES = [i+f for i in SQUARES for f in SQUARES if i!=f]+[move+promotion for move in PROMOTION_MOVES  for promotion in "nbrq"]
 
 
 
 A = len(MOVES)
+print("length moves ", A)
 
 def process_buffer(result: int, buffer: List):
     df = pd.DataFrame(buffer, columns=["state", "policy", "player"])
@@ -96,7 +95,7 @@ def run_episode():
     game = Chess() #.move("e2e4")
     count = 0
     while True:
-        mcts = MCTS( n_sim=10, nn=nn, game=game)
+        mcts = MCTS(n_sim=10, nn=nn, game=game)
         mcts.run()
         s = hash(game.state)
         sum_N = sum(mcts.N[s])
@@ -128,7 +127,7 @@ if __name__=="__main__":
         buffer_df_episode = run_episode()
         buffer_df_episode["episode"] = i
         buffer_df = pd.concat([buffer_df, buffer_df_episode])
-    buffer_df.to_csv("buffer.csv")
+    buffer_df.to_csv("buffer_2.csv")
 
     # not visited actions are Q=0
     # Q_inf_for_neg = [a if a!=0 else -float("inf") for a in mcts.Q[hash(game.state)]]
