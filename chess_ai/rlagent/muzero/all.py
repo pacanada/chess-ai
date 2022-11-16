@@ -1,5 +1,6 @@
 import random
 import time
+import numpy as np
 import pandas as pd
 from chess_ai.rlagent.muzero.utils import get_root_dir, BufferDataset, process_buffer_to_torch, encode_state, MOVES, LEN_MOVES, process_buffer
 from chess_ai.rlagent.muzero.models import AlphazeroNet
@@ -83,18 +84,8 @@ class Episode:
             # actual policy
             P = [n/sum_N for n in mcts.N[s]]
             buffer_per_game.append([encode_state(game.state), P, game.state.turn])
-            # When all are negative reward, it chooses the first move a1a2 because it cannot find a 
-            # winning move. We remove the non explored actions by giving -inf
-            Q_inf_for_neg = [a if a!=0 else -float("inf") for a in mcts.Q[s]]
-            max_value = max(Q_inf_for_neg)
-            if max_value==-float("inf"):
-                print("chosing random move")
-                suggested_move = random.choice(game.legal_moves())
-            else:
-                #max_value = max(mcts.Q[s])
-                index_move = mcts.Q[s].index(max_value)
-                # actually in the original paper introduce a temperature to map the N to the actual policy, for the first 30 moves is just proportional to the visit count then chosing the most visited one
-                suggested_move = MOVES[index_move]
+            # actually in the original paper introduce a temperature to map the N to the actual policy, for the first 30 moves is just proportional to the visit count then chosing the most visited one
+            suggested_move = MOVES[np.random.choice(len(MOVES), p=P)]
             # print(count, "Suggested move", suggested_move)
             count+=1
             game=game.move(suggested_move)
