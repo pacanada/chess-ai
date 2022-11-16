@@ -12,5 +12,4 @@ class AlphazeroNet(nn.Module):
         #x = self.activation(x)
         x_pol = F.relu(self.l3(x))
         x = self.l2(x)
-
         return self.activation(x), F.softmax(x_pol, dim=1)
