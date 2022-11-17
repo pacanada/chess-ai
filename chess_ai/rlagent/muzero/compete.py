@@ -7,7 +7,7 @@ from chess_python.chess import Chess, State
 from chess_ai.rlagent.muzero.utils import MOVES, get_root_dir
 
 white = AlphazeroNet()
-white.load_state_dict(torch.load(get_root_dir() / "checkpoints/nn_latest.pth"))
+white.load_state_dict(torch.load(get_root_dir() / "checkpoints/nn_supervised.pth"))
 white.eval()
 
 black = AlphazeroNet()
@@ -22,7 +22,7 @@ for i in range(10):
         
         #if game.state.turn==1:
             #suggested_move = np.random.choice(game.legal_moves())
-        mcts = MCTS(n_sim=30, nn=model, game=game)
+        mcts = MCTS(n_sim=5, nn=model, game=game)
         mcts.run()
         s = hash(game.state)
         sum_N = sum(mcts.N[s])
