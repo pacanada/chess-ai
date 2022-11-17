@@ -3,10 +3,11 @@ import torch
 from chess_ai.rlagent.muzero.all import MCTS
 from chess_ai.rlagent.muzero.models import AlphazeroNet
 from chess_python.chess import Chess, State
+from chess_ai.rlagent.muzero.models import AlphazeroNetSupervised
 
 from chess_ai.rlagent.muzero.utils import MOVES, get_root_dir
 
-white = AlphazeroNet()
+white = AlphazeroNetSupervised()
 white.load_state_dict(torch.load(get_root_dir() / "checkpoints/nn_supervised.pth"))
 white.eval()
 
@@ -22,7 +23,7 @@ for i in range(10):
         
         #if game.state.turn==1:
             #suggested_move = np.random.choice(game.legal_moves())
-        mcts = MCTS(n_sim=5, nn=model, game=game)
+        mcts = MCTS(n_sim=40, nn=model, game=game)
         mcts.run()
         s = hash(game.state)
         sum_N = sum(mcts.N[s])

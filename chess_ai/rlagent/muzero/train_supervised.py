@@ -4,31 +4,20 @@ from torch import nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 import torch
+from chess_ai.rlagent.muzero.models import AlphazeroNetSupervised
 
 from chess_ai.rlagent.muzero.utils import BufferDataset, get_root_dir, process_buffer_to_torch
-class AlphazeroNet(nn.Module):
-    def __init__(self):
-        super(AlphazeroNet, self).__init__()
-        self.l1 = nn.Linear(67, 10)
-        self.l2 = nn.Linear(10, 1)
-        self.l3 = nn.Linear(10, 4208)
-        self.activation = nn.Tanh()
-    def forward(self, x):
-        x = self.l1(x)
-        #x = self.activation(x)
-        x_pol = F.relu(self.l3(x))
-        x = self.l2(x)
-        return self.activation(x), F.softmax(x_pol, dim=1)
+
 
 
 batch_size = 1000
-epochs = 100
-buffer = pd.read_feather("supervised_dataset.feather")
-buffer["value_all"] = buffer.evaluation.apply(lambda x: x["value"] if x["type"]=="cp" else x["value"]*10000)
-buffer["value"] = 1/(1+np.exp(-0.01*buffer.value_all))
+epochs = 200
+buffer = pd.concat([pd.read_feather("supervised_dataset_1.feather"), pd.read_feather("supervised_dataset_2.feather")] )
+#buffer["value_all"] = buffer.evaluation.apply(lambda x: x["value"] if x["type"]=="cp" else x["value"]*10000)
+buffer["value"] = 1/(1+np.exp(-0.01*buffer.evaluation))
 #buffer["mate_value"] = buffer.evaluation.apply(lambda x: x["value"] if x["type"]=="mate" else None)
-model = AlphazeroNet()
-model.load_state_dict(torch.load(get_root_dir() / "checkpoints/nn_latest.pth"))
+model = AlphazeroNetSupervised()
+model.load_state_dict(torch.load(get_root_dir() / "checkpoints/nn_supervised.pth"))
 model.eval()
 x, y_value, y_policy = process_buffer_to_torch(buffer)
 dataset = BufferDataset(x=x,y_value=y_value, y_policy=y_policy)
