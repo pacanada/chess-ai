@@ -1,6 +1,9 @@
 from copy import deepcopy
 import random
+import numpy as np
 import pandas as pd
+from chess_ai.rlagent.muzero.all import MCTS
+from chess_ai.rlagent.muzero.utils import MOVES
 
 from chess_ai.rlagent.training.trainer import encode_state
 
@@ -30,3 +33,18 @@ class Agent:
 
         list_moves = sorted(list_moves, key=lambda item: item[1], reverse=self.color == 1)
         return list_moves
+
+class AlphaZeroAgent:
+    def __init__(self, game, model, n_sim):
+        self.game = deepcopy(game)
+        self.model = model
+        self.n_sim = n_sim
+    def recommend(self):
+        mcts = MCTS(n_sim=self.n_sim, nn=self.model, game=self.game)
+        mcts.run()
+        s = hash(self.game.state)
+        sum_N = sum(mcts.N[s])
+        # actual policy
+        P = [n/sum_N for n in mcts.N[s]]
+        suggested_move = MOVES[np.random.choice(len(MOVES), p=P)]
+        return [[suggested_move]]

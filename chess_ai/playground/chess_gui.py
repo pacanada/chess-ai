@@ -4,12 +4,19 @@ from typing import List, Tuple
 
 import pyglet
 from chess_python.chess import Chess
+import torch
 
 #from chess_ai.classical_agent.agent import Agent
-from chess_ai.rlagent.agent import Agent
+from chess_ai.rlagent.agent import Agent, AlphaZeroAgent
+from chess_ai.rlagent.muzero.models import AlphazeroNetSupervised
+from chess_ai.rlagent.muzero.utils import get_root_dir
 
-with open("model_3.pickle", "rb") as f:
-    model = pickle.load(f)
+# with open("model_3.pickle", "rb") as f:
+#     model = pickle.load(f)
+
+model = AlphazeroNetSupervised()
+model.load_state_dict(torch.load(get_root_dir() / "checkpoints/nn_supervised.pth"))
+model.eval()
 
 W = H = 480
 PIECE_IMAGE_DICT = {
@@ -202,7 +209,8 @@ class ChessBoard(pyglet.window.Window):
         # )
 
         # recommended_moves = agent.recommend(node=game_copy, order=True, random_flag=False)
-        recommended_moves = Agent(color=game_copy.state.turn, game=game_copy, model=model).recommend()
+        #recommended_moves = Agent(color=game_copy.state.turn, game=game_copy, model=model).recommend()
+        recommended_moves = AlphaZeroAgent(game=game_copy, model=model, n_sim=10).recommend()
         
 
         # in case there are several moves with same value
