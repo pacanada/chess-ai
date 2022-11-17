@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from torch import nn
 import torch.nn.functional as F
@@ -20,9 +21,12 @@ class AlphazeroNet(nn.Module):
         return self.activation(x), F.softmax(x_pol, dim=1)
 
 
-batch_size = 100
+batch_size = 1000
 epochs = 100
 buffer = pd.read_feather("supervised_dataset.feather")
+buffer["value_all"] = buffer.evaluation.apply(lambda x: x["value"] if x["type"]=="cp" else x["value"]*10000)
+buffer["value"] = 1/(1+np.exp(-0.01*buffer.value_all))
+#buffer["mate_value"] = buffer.evaluation.apply(lambda x: x["value"] if x["type"]=="mate" else None)
 model = AlphazeroNet()
 model.load_state_dict(torch.load(get_root_dir() / "checkpoints/nn_latest.pth"))
 model.eval()

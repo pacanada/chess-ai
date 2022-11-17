@@ -74,7 +74,7 @@ def generate_dataset():
         if j%10==0:
             print("Saving at ", j)
             buffer.reset_index().to_feather("supervised_dataset.feather")
-    buffer.reset_index().to_feather("supervised_dataset.feather")
+    buffer.reset_index().to_feather("supervised_dataset_last.feather")
 
 if __name__ =="__main__":
     generate_dataset()
