@@ -11,7 +11,7 @@ from chess_ai.rlagent.muzero.utils import BufferDataset, get_root_dir, process_b
 
 
 batch_size = 1000
-epochs = 200
+epochs = 5
 buffer = pd.concat([pd.read_feather("supervised_dataset_1.feather"), pd.read_feather("supervised_dataset_2.feather")] )
 #buffer["value_all"] = buffer.evaluation.apply(lambda x: x["value"] if x["type"]=="cp" else x["value"]*10000)
 buffer["value"] = 1/(1+np.exp(-0.01*buffer.evaluation))
