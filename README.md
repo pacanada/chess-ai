@@ -55,3 +55,6 @@ Important for testing TODO:
 Supervised training for initial nn
 Introduce temperature, not only the most visited node
 Evaluate previous nets
+
+## problems
+- [ ] en-passant not showing in stockfish 

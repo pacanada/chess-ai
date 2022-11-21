@@ -75,7 +75,7 @@ def generate_dataset():
             # Evaluation of pos
             evaluation_raw = engine.get_evaluation()
             evaluation = evaluation_raw["value"] if evaluation_raw["type"]=="cp" else evaluate_mate(evaluation_raw["value"])
-            # somehow the en-passant is not recognized in the fen notation!
+            # TODO: somehow the en-passant is not recognized in the fen notation!
             state = encode_state(Chess(engine.get_fen_position()).state)
             # print(f"--------Turn:{turn}")
             # if max(move_evaluation)>5000:
