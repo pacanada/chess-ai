@@ -70,3 +70,10 @@ def process_buffer(result: int, buffer: List):
     else:
         df["value"] = result*df["player"]
     return df
+
+def softmax_with_temparature(vec: list, temperature=10):
+    """
+    https://stats.stackexchange.com/questions/419751/why-is-softmax-function-used-to-calculate-probabilities-although-we-can-divide-e
+    """
+    exp_vec = np.exp([value*temperature for value in vec])
+    return exp_vec/sum(exp_vec)

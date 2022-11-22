@@ -58,3 +58,4 @@ Evaluate previous nets
 
 ## problems
 - [ ] en-passant not showing in stockfish 
+- [ ] do the processing of evaluation and policy after generating the dataset
