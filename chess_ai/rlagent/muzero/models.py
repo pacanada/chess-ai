@@ -17,10 +17,10 @@ class AlphazeroNet(nn.Module):
 class AlphazeroNetSupervised(nn.Module):
     def __init__(self):
         super(AlphazeroNetSupervised, self).__init__()
-        self.l1 = nn.Linear(67, 100)
+        self.l1 = nn.Linear(67, 200)
         #self.l1_a = nn.Linear(100, 200)
-        self.l2 = nn.Linear(100, 1)
-        self.l3 = nn.Linear(100, 4208)
+        self.l2 = nn.Linear(200, 1)
+        self.l3 = nn.Linear(200, 4208)
         self.activation = nn.Tanh()
     def forward(self, x):
         x = self.l1(x)

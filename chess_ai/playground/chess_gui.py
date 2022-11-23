@@ -210,7 +210,7 @@ class ChessBoard(pyglet.window.Window):
 
         # recommended_moves = agent.recommend(node=game_copy, order=True, random_flag=False)
         #recommended_moves = Agent(color=game_copy.state.turn, game=game_copy, model=model).recommend()
-        recommended_moves = AlphaZeroAgent(game=game_copy, model=model, n_sim=10).recommend()
+        recommended_moves = AlphaZeroAgent(game=game_copy, model=model, n_sim=200).recommend()
         
 
         # in case there are several moves with same value
