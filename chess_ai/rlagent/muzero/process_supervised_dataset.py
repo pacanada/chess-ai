@@ -55,14 +55,21 @@ def process_buffer_pickle(buffer):
     buffer_df = pd.DataFrame.from_dict(data=buffer, orient="index")
     buffer_df["scores_number"] = buffer_df.scores.apply(convert_pov_score)
     buffer_df["scores_softmax"] = buffer_df.scores_number.apply(convert_to_softmax)
-    # the best position it can choose is the value
+    # the best position it can choose is the value (maximum score number would be the optimal for each player)
     buffer_df["value_number"] = buffer_df.scores_number.apply(lambda x: max(x))
-    buffer_df["value"] = 1/(1+np.exp(-0.01*buffer_df.value_number))
+    # softmax: visualize with plt.plot(x, 1/(1+np.exp(-1e-3*x)));plt.show()
+    buffer_df["value"] = 1/(1+np.exp(-0.001*buffer_df.value_number))
     buffer_df["policy"] = buffer_df.apply(from_set_to_general_moves, axis=1)
     return buffer_df.reset_index()
 
-with open(get_root_dir() / "data" / "pickle" / f"buffer_3.pickle", "rb") as f:
-    buffer = pickle.load(f)
-buffer_df = process_buffer_pickle(buffer)
-buffer_df.drop("scores", axis=1).to_feather(get_root_dir() / "data" / "dataframe" / "buffer_3_df.feather") 
+buffer = pd.DataFrame()
+for i in range(4):
+    print(f"Processing {i+1}/4")
+    with open(get_root_dir() / "data" / "pickle" / f"buffer_{i+1}.pickle", "rb") as f:
+        buffer_pickle= pickle.load(f)
+    buffer_ = process_buffer_pickle(buffer_pickle)
+    buffer = pd.concat([buffer, buffer_])
+
+
+buffer.drop("scores", axis=1).reset_index().to_feather(get_root_dir() / "data" / "dataframe" / "buffer_df.feather") 
 
