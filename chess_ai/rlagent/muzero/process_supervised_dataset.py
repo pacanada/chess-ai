@@ -57,8 +57,8 @@ def process_buffer_pickle(buffer):
     buffer_df["scores_softmax"] = buffer_df.scores_number.apply(convert_to_softmax)
     # the best position it can choose is the value (maximum score number would be the optimal for each player)
     buffer_df["value_number"] = buffer_df.scores_number.apply(lambda x: max(x))
-    # softmax: visualize with plt.plot(x, 1/(1+np.exp(-1e-3*x)));plt.show()
-    buffer_df["value"] = 1/(1+np.exp(-0.001*buffer_df.value_number))
+    # softmax: visualize with plt.plot(x, 2/(1+np.exp(-1e-3*x))-1);plt.show()
+    buffer_df["value"] = 2/(1+np.exp(-0.001*buffer_df.value_number))-1
     buffer_df["policy"] = buffer_df.apply(from_set_to_general_moves, axis=1)
     return buffer_df.reset_index()
 
