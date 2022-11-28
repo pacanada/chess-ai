@@ -7,7 +7,7 @@ from chess_python.chess import Chess
 import torch
 
 #from chess_ai.classical_agent.agent import Agent
-from chess_ai.rlagent.agent import Agent, AlphaZeroAgent
+from chess_ai.rlagent.agent import Agent, AlphaZeroAgent, AlphaZeroAgentPurePolicy
 from chess_ai.rlagent.muzero.models import AlphazeroNetSupervised
 from chess_ai.rlagent.muzero.utils import get_root_dir
 
@@ -210,8 +210,8 @@ class ChessBoard(pyglet.window.Window):
 
         # recommended_moves = agent.recommend(node=game_copy, order=True, random_flag=False)
         #recommended_moves = Agent(color=game_copy.state.turn, game=game_copy, model=model).recommend()
-        recommended_moves = AlphaZeroAgent(game=game_copy, model=model, n_sim=200).recommend()
-        
+        #recommended_moves = AlphaZeroAgent(game=game_copy, model=model, n_sim=2).recommend()
+        recommended_moves = AlphaZeroAgentPurePolicy(game=game_copy, model=model).recommend()
 
         # in case there are several moves with same value
         best_move = recommended_moves[0][0]

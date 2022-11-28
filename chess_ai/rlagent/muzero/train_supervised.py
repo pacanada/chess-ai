@@ -13,19 +13,17 @@ from chess_ai.rlagent.muzero.utils import BufferDataset, get_root_dir, process_b
 
 batch_size = 5000
 epochs = 100
-buffer = pd.DataFrame()
-for i in range(4):
-    buffer_ = pd.read_feather(get_root_dir() / "data" / "dataframe" / f"buffer_{i+1}_df.feather")
-    buffer = pd.concat([buffer, buffer_])
+buffer = pd.read_feather(get_root_dir() / "data" / "dataframe" / f"buffer_df.feather")
 print(buffer.shape)
 # buffer_1 = pd.read_feather(get_root_dir() / "data" / "dataframe" / "buffer_1_df.feather")
 #buffer["value_all"] = buffer.evaluation.apply(lambda x: x["value"] if x["type"]=="cp" else x["value"]*10000)
 #buffer["value"] = 1/(1+np.exp(-0.01*buffer.evaluation))
 #buffer["mate_value"] = buffer.evaluation.apply(lambda x: x["value"] if x["type"]=="mate" else None)
 model = AlphazeroNetSupervised()
-# model.load_state_dict(torch.load(get_root_dir() / "checkpoints/nn_supervised.pth"))
-# model.eval()
+model.load_state_dict(torch.load(get_root_dir() / "checkpoints/nn_supervised.pth"))
+model.eval()
 x, y_value, y_policy = process_buffer_to_torch(buffer)
+print("processed to torch")
 dataset = BufferDataset(x=x,y_value=y_value, y_policy=y_policy)
 train_dataloader = DataLoader(dataset=dataset, shuffle=True, batch_size=batch_size)
 

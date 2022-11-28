@@ -2,6 +2,7 @@ from copy import deepcopy
 import random
 import numpy as np
 import pandas as pd
+import torch
 from chess_ai.rlagent.muzero.all import MCTS
 from chess_ai.rlagent.muzero.utils import MOVES
 
@@ -47,4 +48,13 @@ class AlphaZeroAgent:
         # actual policy
         P = [n/sum_N for n in mcts.N[s]]
         suggested_move = MOVES[np.random.choice(len(MOVES), p=P)]
+        return [[suggested_move]]
+
+class AlphaZeroAgentPurePolicy:
+    def __init__(self, game, model):
+        self.game = deepcopy(game)
+        self.model = model
+    def recommend(self):
+        v_model, policy = self.model(torch.tensor(encode_state(self.game.state), dtype=torch.float32).view(-1,67))
+        suggested_move = MOVES[np.random.choice(len(MOVES), p=policy[0].detach().numpy())]
         return [[suggested_move]]
