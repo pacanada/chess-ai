@@ -11,14 +11,14 @@ from chess_ai.rlagent.muzero.utils import BufferDataset, get_root_dir, process_b
 
 
 
-batch_size = 1000
+batch_size = 5000
 epochs = 100
 buffer = pd.DataFrame()
-for i in range(2):
+for i in range(4):
     buffer_ = pd.read_feather(get_root_dir() / "data" / "dataframe" / f"buffer_{i+1}_df.feather")
     buffer = pd.concat([buffer, buffer_])
-
-buffer_1 = pd.read_feather(get_root_dir() / "data" / "dataframe" / "buffer_1_df.feather")
+print(buffer.shape)
+# buffer_1 = pd.read_feather(get_root_dir() / "data" / "dataframe" / "buffer_1_df.feather")
 #buffer["value_all"] = buffer.evaluation.apply(lambda x: x["value"] if x["type"]=="cp" else x["value"]*10000)
 #buffer["value"] = 1/(1+np.exp(-0.01*buffer.evaluation))
 #buffer["mate_value"] = buffer.evaluation.apply(lambda x: x["value"] if x["type"]=="mate" else None)
