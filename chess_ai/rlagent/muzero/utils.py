@@ -36,6 +36,15 @@ def process_buffer_to_torch(buffer: pd.DataFrame):
     y_policy = torch.tensor(np.stack(buffer.policy.values, axis=0), dtype=torch.float32)
     return x, y_values, y_policy
 
+def process_buffer_to_torch_state_64(buffer: pd.DataFrame):
+    # ouch
+    buffer["state_64"] = buffer.state.apply(lambda x: x[:-3])
+    print(len(buffer.state_64.iloc[0]))
+    x = torch.tensor(np.stack(buffer.state_64.values, axis=0), dtype=torch.float32).view(-1,64)
+    y_values = torch.tensor(buffer.value.values,dtype=torch.float32).view(-1,1) # [:,1]
+    y_policy = torch.tensor(np.stack(buffer.policy.values, axis=0), dtype=torch.float32)
+    return x, y_values, y_policy
+
 def loss_policy_f(inputs, targets):
         return -torch.sum(targets * inputs) / targets.size()[0]
 

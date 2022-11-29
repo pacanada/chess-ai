@@ -60,4 +60,4 @@ Evaluate previous nets
 - [x] en-passant not showing in stockfish 
 - [x] do the processing of evaluation and policy after generating the dataset
 - [x] policies and evaluation change even for the same state in supervised dataset
-- [x] value head learn, policy doesnt seem to
+- [x] value head learn, policy doesnt seem to (it does, just need a bigger network). Use Log_sfotmax instead of pure softmax! Crazy difference

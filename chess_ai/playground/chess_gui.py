@@ -8,14 +8,17 @@ import torch
 
 #from chess_ai.classical_agent.agent import Agent
 from chess_ai.rlagent.agent import Agent, AlphaZeroAgent, AlphaZeroAgentPurePolicy
-from chess_ai.rlagent.muzero.models import AlphazeroNetSupervised
+from chess_ai.rlagent.muzero.models import AlphazeroNetSupervised, ChessNet
 from chess_ai.rlagent.muzero.utils import get_root_dir
 
 # with open("model_3.pickle", "rb") as f:
 #     model = pickle.load(f)
 
-model = AlphazeroNetSupervised()
-model.load_state_dict(torch.load(get_root_dir() / "checkpoints/nn_supervised_conv.pth"))
+# model = AlphazeroNetSupervised()
+# model.load_state_dict(torch.load(get_root_dir() / "checkpoints/nn_supervised_conv.pth"))
+# model.eval()
+model = ChessNet()
+model.load_state_dict(torch.load(get_root_dir()/  "checkpoints/nn_supervised_conv_kaggle (4).pth", map_location=torch.device('cpu')))
 model.eval()
 
 W = H = 480
@@ -210,7 +213,7 @@ class ChessBoard(pyglet.window.Window):
 
         # recommended_moves = agent.recommend(node=game_copy, order=True, random_flag=False)
         #recommended_moves = Agent(color=game_copy.state.turn, game=game_copy, model=model).recommend()
-        recommended_moves = AlphaZeroAgent(game=game_copy, model=model, n_sim=10).recommend()
+        recommended_moves = AlphaZeroAgent(game=game_copy, model=model, n_sim=50).recommend()
         #recommended_moves = AlphaZeroAgentPurePolicy(game=game_copy, model=model).recommend()
 
         # in case there are several moves with same value

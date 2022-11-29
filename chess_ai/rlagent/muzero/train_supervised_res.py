@@ -1,54 +1,14 @@
-from torch import nn
-import torch.nn.functional as F
-class AlphazeroNet(nn.Module):
-    def __init__(self):
-        super(AlphazeroNet, self).__init__()
-        self.l1 = nn.Linear(67, 10)
-        self.l2 = nn.Linear(10, 1)
-        self.l3 = nn.Linear(10, 4208)
-        self.activation = nn.Tanh()
-    def forward(self, x):
-        x = self.l1(x)
-        #x = self.activation(x)
-        x_pol = F.relu(self.l3(x))
-        x = self.l2(x)
-        return self.activation(x), F.softmax(x_pol, dim=1)
-
-class AlphazeroNetSupervisedOld(nn.Module):
-    def __init__(self):
-        super(AlphazeroNetSupervisedOld, self).__init__()
-        self.l1 = nn.Linear(67, 200)
-        #self.l1_a = nn.Linear(100, 200)
-        self.l2 = nn.Linear(200, 1)
-        self.l3 = nn.Linear(200, 4208)
-        self.activation = nn.Tanh()
-    def forward(self, x):
-        x = self.l1(x)
-        #x = self.l1_a(x)
-        #x = self.activation(x)
-        x_pol = F.relu(self.l3(x))
-        x = self.l2(x)
-        return self.activation(x), F.log_softmax(x_pol, dim=1)
-
-class AlphazeroNetSupervised(nn.Module):
-    def __init__(self):
-        super(AlphazeroNetSupervised, self).__init__()
-        self.c1 = nn.Conv1d(1, 20, kernel_size=3, stride=1)
-        self.l1 = nn.Linear(20*(67-2),1)
-        self.l2 = nn.Linear(20*(67-2),4208)
-        self.activation = nn.Tanh()
-    def forward(self, x):
-        x = x.view(-1,1,67)
-        x = self.c1(x)
-        #x = self.l1_a(x)
-        #x = self.activation(x)
-        x_pol = F.relu(self.l2(x.view(-1,20*(67-2))))
-        x = self.l1(x.view(-1,20*(67-2)))
-        return self.activation(x), F.softmax(x_pol, dim=1)
-
+from matplotlib import pyplot as plt
+import numpy as np
+import pandas as pd
 from torch import nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
+import torch
+from chess_ai.rlagent.muzero.models import AlphazeroNetSupervised, AlphazeroNetSupervisedOld
+
+from chess_ai.rlagent.muzero.utils import MOVES, BufferDataset, get_root_dir, process_buffer_to_torch, process_buffer_to_torch_state_64
+
 class ConvBlock(nn.Module):
     def __init__(self):
         super(ConvBlock, self).__init__()
@@ -108,13 +68,57 @@ class ChessNet(nn.Module):
     def __init__(self):
         super(ChessNet, self).__init__()
         self.conv = ConvBlock()
-        for i in range(10):
+        for i in range(1):
             setattr(self, f"res_{i}",ResBlock())
         self.outblock = OutBlock()
     
     def forward(self,s):
         s = self.conv(s)
-        for i in range(10):
+        for i in range(1):
             s = getattr(self, f"res_{i}")(s)
         s = self.outblock(s)
         return s
+
+
+batch_size = 100
+epochs = 1000
+buffer = pd.read_feather(get_root_dir() / "data" / "dataframe" / f"buffer_df.feather").head(100)
+print(buffer.shape)
+# buffer_1 = pd.read_feather(get_root_dir() / "data" / "dataframe" / "buffer_1_df.feather")
+#buffer["value_all"] = buffer.evaluation.apply(lambda x: x["value"] if x["type"]=="cp" else x["value"]*10000)
+#buffer["value"] = 1/(1+np.exp(-0.01*buffer.evaluation))
+#buffer["mate_value"] = buffer.evaluation.apply(lambda x: x["value"] if x["type"]=="mate" else None)
+model = ChessNet()
+# model.load_state_dict(torch.load(get_root_dir() / "checkpoints/nn_supervised_res.pth"))
+# model.eval()
+x, y_value, y_policy = process_buffer_to_torch_state_64(buffer)
+print("processed to torch")
+dataset = BufferDataset(x=x,y_value=y_value, y_policy=y_policy)
+train_dataloader = DataLoader(dataset=dataset, shuffle=True, batch_size=batch_size)
+
+loss_v_f = torch.nn.MSELoss()
+loss_policy_f = torch.nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, weight_decay=0)
+model.train()
+
+loss_list = []
+
+for it in range(epochs):
+    for x, y_value, y_policy in train_dataloader:
+        optimizer.zero_grad()
+        y_value_pred, y_policy_pred = model(x)        
+        loss_value = loss_v_f(y_value_pred, y_value)
+        loss_policy = loss_policy_f(y_policy_pred, y_policy)
+        loss = 40*loss_value+loss_policy
+        #loss = loss_policy
+        loss.backward()
+        optimizer.step()
+
+    loss_list.append(loss.mean().detach().numpy())
+    print(f"Epoch: {it}/{epochs}, loss: {loss.mean()}")
+    if it%50==0:
+        torch.save(model.state_dict(), get_root_dir() /"checkpoints/nn_supervised_res.pth")
+        print("saving")
+torch.save(model.state_dict(), get_root_dir() /"checkpoints/nn_supervised_res.pth")
+plt.plot(loss_list)
+plt.show()
