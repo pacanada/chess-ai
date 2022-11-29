@@ -25,7 +25,8 @@ def main():
             if board.outcome() is not None:
                 print(board.outcome())
                 break
-            result = engine.analyse(board, chess.engine.Limit(time=0.01), multipv=5)
+            # set game is a trick to give always the same best moves
+            result = engine.analyse(board, chess.engine.Limit(depth=5), multipv=5, game=object())
             
             moves = [res["pv"][0].uci() for res in result]
             scores = [res["score"] for res in result]
@@ -38,8 +39,10 @@ def main():
             encoded_state = encode_state(Chess(fen=fen).state)
             buffer[f"{n}_{i}"] = {"moves":moves, "scores":scores, "move": move, "state": encoded_state, "fen": fen}
             board.push(Move.from_uci(move))
+        if n%50==0:
+            print(n)
     engine.quit()
-    with open(get_root_dir() / "data" / "pickle" / f"buffer_4.pickle", "wb") as f:
+    with open(get_root_dir() / "data" / "pickle" / f"buffer_2.pickle", "wb") as f:
         pickle.dump(buffer, f)
 
 

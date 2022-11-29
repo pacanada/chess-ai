@@ -57,5 +57,7 @@ Introduce temperature, not only the most visited node
 Evaluate previous nets
 
 ## problems
-- [ ] en-passant not showing in stockfish 
-- [ ] do the processing of evaluation and policy after generating the dataset
+- [x] en-passant not showing in stockfish 
+- [x] do the processing of evaluation and policy after generating the dataset
+- [x] policies and evaluation change even for the same state in supervised dataset
+- [x] value head learn, policy doesnt seem to
