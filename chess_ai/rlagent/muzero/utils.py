@@ -31,10 +31,10 @@ class BufferDataset(Dataset):
 
 def process_buffer_to_torch(buffer: pd.DataFrame):
     # ouch
-    X = torch.tensor(np.stack(buffer.state.values, axis=0), dtype=torch.float32)
+    x = torch.tensor(np.stack(buffer.state.values, axis=0), dtype=torch.float32)
     y_values = torch.tensor(buffer.value.values,dtype=torch.float32).view(-1,1) # [:,1]
     y_policy = torch.tensor(np.stack(buffer.policy.values, axis=0), dtype=torch.float32)
-    return X, y_values, y_policy
+    return x, y_values, y_policy
 
 def loss_policy_f(inputs, targets):
         return -torch.sum(targets * inputs) / targets.size()[0]

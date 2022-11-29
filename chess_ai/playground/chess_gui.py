@@ -15,7 +15,7 @@ from chess_ai.rlagent.muzero.utils import get_root_dir
 #     model = pickle.load(f)
 
 model = AlphazeroNetSupervised()
-model.load_state_dict(torch.load(get_root_dir() / "checkpoints/nn_supervised.pth"))
+model.load_state_dict(torch.load(get_root_dir() / "checkpoints/nn_supervised_conv.pth"))
 model.eval()
 
 W = H = 480
@@ -210,8 +210,8 @@ class ChessBoard(pyglet.window.Window):
 
         # recommended_moves = agent.recommend(node=game_copy, order=True, random_flag=False)
         #recommended_moves = Agent(color=game_copy.state.turn, game=game_copy, model=model).recommend()
-        #recommended_moves = AlphaZeroAgent(game=game_copy, model=model, n_sim=2).recommend()
-        recommended_moves = AlphaZeroAgentPurePolicy(game=game_copy, model=model).recommend()
+        recommended_moves = AlphaZeroAgent(game=game_copy, model=model, n_sim=10).recommend()
+        #recommended_moves = AlphaZeroAgentPurePolicy(game=game_copy, model=model).recommend()
 
         # in case there are several moves with same value
         best_move = recommended_moves[0][0]

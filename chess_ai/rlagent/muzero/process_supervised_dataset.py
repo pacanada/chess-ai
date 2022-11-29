@@ -20,7 +20,7 @@ def convert_pov_score(x):
 
 def convert_to_softmax(x):
     ranked_moves = rank_moves(x)
-    out = softmax_with_temparature(ranked_moves, 10)
+    out = softmax_with_temparature(ranked_moves, 1)
     return out
 
 def softmax_with_temparature(vec: list, temperature=10):
@@ -63,9 +63,10 @@ def process_buffer_pickle(buffer):
     return buffer_df.reset_index()
 
 buffer = pd.DataFrame()
-for i in range(4):
+for i in range(2):
     print(f"Processing {i+1}/4")
     with open(get_root_dir() / "data" / "pickle" / f"buffer_{i+1}.pickle", "rb") as f:
+    #with open(get_root_dir() / "data" / "pickle" / f"buffer_new.pickle", "rb") as f:
         buffer_pickle= pickle.load(f)
     buffer_ = process_buffer_pickle(buffer_pickle)
     buffer = pd.concat([buffer, buffer_])
