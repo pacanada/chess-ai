@@ -56,7 +56,7 @@ class ConvBlock(nn.Module):
         self.bn1 = nn.BatchNorm2d(256)
 
     def forward(self, s):
-        s = s.view(-1, 1, 8, 8)  # batch_size x channels x board_x x board_y
+        s = s.view(-1, 1, 9, 8)  # batch_size x channels x board_x x board_y
         s = F.relu(self.bn1(self.conv1(s)))
         return s
 
@@ -85,21 +85,21 @@ class OutBlock(nn.Module):
         super(OutBlock, self).__init__()
         self.conv = nn.Conv2d(256, 1, kernel_size=1) # value head
         self.bn = nn.BatchNorm2d(1)
-        self.fc1 = nn.Linear(8*8, 64)
+        self.fc1 = nn.Linear(9*8, 64)
         self.fc2 = nn.Linear(64, 1)
         
         self.conv1 = nn.Conv2d(256, 128, kernel_size=1) # policy head
         self.bn1 = nn.BatchNorm2d(128)
-        self.fc = nn.Linear(8*8*128, 4208)
+        self.fc = nn.Linear(9*8*128, 4208)
     
     def forward(self,s):
         v = F.relu(self.bn(self.conv(s))) # value head
-        v = v.view(-1, 8*8)  # batch_size X channel X height X width
+        v = v.view(-1, 9*8)  # batch_size X channel X height X width
         v = F.relu(self.fc1(v))
         v = F.tanh(self.fc2(v))
         
         p = F.relu(self.bn1(self.conv1(s))) # policy head
-        p = p.view(-1, 8*8*128)
+        p = p.view(-1, 9*8*128)
         p = self.fc(p)
         p = F.softmax(p, dim=1)
         return v, p

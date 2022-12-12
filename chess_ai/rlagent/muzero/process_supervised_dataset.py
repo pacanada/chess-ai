@@ -63,8 +63,8 @@ def process_buffer_pickle(buffer):
     return buffer_df.reset_index()
 
 buffer = pd.DataFrame()
-for i in range(2):
-    print(f"Processing {i+1}/4")
+for i in range(5):
+    print(f"Processing {i+1}")
     with open(get_root_dir() / "data" / "pickle" / f"buffer_{i+1}.pickle", "rb") as f:
     #with open(get_root_dir() / "data" / "pickle" / f"buffer_new.pickle", "rb") as f:
         buffer_pickle= pickle.load(f)

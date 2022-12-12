@@ -29,7 +29,7 @@ class MCTS:
         if s not in self.visited:
             self.visited.append(s)
             #v_model, policy = self.nn(torch.tensor(encode_state(game.state), dtype=torch.float32).view(-1,67)) #self.nn.predict(game.state)
-            v_model, policy = self.nn(torch.tensor(encode_state(game.state)[:-3], dtype=torch.float32).view(-1,64))
+            v_model, policy = self.nn(torch.tensor(np.concatenate([encode_state(game.state), np.array([0]*5)]), dtype=torch.float32).view(-1,72))
             # test by MOVES[policy.detach().argmax().item()]
             self.P[s] = policy.tolist()[0]
             self.N[s] = [0]*LEN_MOVES
