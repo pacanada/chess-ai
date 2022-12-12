@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 import torch
 from chess_ai.rlagent.muzero.models import AlphazeroNetSupervised, AlphazeroNetSupervisedOld
 
-from chess_ai.rlagent.muzero.utils import MOVES, BufferDataset, get_root_dir, process_buffer_to_torch, process_buffer_to_torch_state_64
+from chess_ai.rlagent.muzero.utils import MOVES, BufferDataset, get_root_dir, process_buffer_to_torch, process_buffer_to_torch_state_64, process_buffer_to_torch_state_72
 
 class ConvBlock(nn.Module):
     def __init__(self):
@@ -16,7 +16,7 @@ class ConvBlock(nn.Module):
         self.bn1 = nn.BatchNorm2d(256)
 
     def forward(self, s):
-        s = s.view(-1, 1, 8, 8)  # batch_size x channels x board_x x board_y
+        s = s.view(-1, 1, 9, 8)  # batch_size x channels x board_x x board_y
         s = F.relu(self.bn1(self.conv1(s)))
         return s
 
@@ -45,21 +45,21 @@ class OutBlock(nn.Module):
         super(OutBlock, self).__init__()
         self.conv = nn.Conv2d(256, 1, kernel_size=1) # value head
         self.bn = nn.BatchNorm2d(1)
-        self.fc1 = nn.Linear(8*8, 64)
+        self.fc1 = nn.Linear(9*8, 64)
         self.fc2 = nn.Linear(64, 1)
         
         self.conv1 = nn.Conv2d(256, 128, kernel_size=1) # policy head
         self.bn1 = nn.BatchNorm2d(128)
-        self.fc = nn.Linear(8*8*128, 4208)
+        self.fc = nn.Linear(9*8*128, 4208)
     
     def forward(self,s):
         v = F.relu(self.bn(self.conv(s))) # value head
-        v = v.view(-1, 8*8)  # batch_size X channel X height X width
+        v = v.view(-1, 9*8)  # batch_size X channel X height X width
         v = F.relu(self.fc1(v))
         v = F.tanh(self.fc2(v))
         
         p = F.relu(self.bn1(self.conv1(s))) # policy head
-        p = p.view(-1, 8*8*128)
+        p = p.view(-1, 9*8*128)
         p = self.fc(p)
         p = F.softmax(p, dim=1)
         return v, p
@@ -79,6 +79,11 @@ class ChessNet(nn.Module):
         s = self.outblock(s)
         return s
 
+def evaluate(model, x_test, y_test, y_policy_test):
+    pass
+
+
+
 
 batch_size = 100
 epochs = 1000
@@ -91,9 +96,12 @@ print(buffer.shape)
 model = ChessNet()
 # model.load_state_dict(torch.load(get_root_dir() / "checkpoints/nn_supervised_res.pth"))
 # model.eval()
-x, y_value, y_policy = process_buffer_to_torch_state_64(buffer)
+x, y_value, y_policy = process_buffer_to_torch_state_72(buffer)
+x_train, x_test = x[:,-100:-1], x[:,0:-100] 
+y_value_train, y_value_test = y_value[:,-100:-1], y_value[:,0:-100] 
+y_policy_train, y_policy_test = y_policy[:,-100:-1], y_policy[:,0:-100]   
 print("processed to torch")
-dataset = BufferDataset(x=x,y_value=y_value, y_policy=y_policy)
+dataset = BufferDataset(x=x,y_value=y_value, y_policy=y_policy.to_sparse())
 train_dataloader = DataLoader(dataset=dataset, shuffle=True, batch_size=batch_size)
 
 loss_v_f = torch.nn.MSELoss()
@@ -108,7 +116,7 @@ for it in range(epochs):
         optimizer.zero_grad()
         y_value_pred, y_policy_pred = model(x)        
         loss_value = loss_v_f(y_value_pred, y_value)
-        loss_policy = loss_policy_f(y_policy_pred, y_policy)
+        loss_policy = loss_policy_f(y_policy_pred, y_policy.to_dense())
         loss = 40*loss_value+loss_policy
         #loss = loss_policy
         loss.backward()

@@ -1,6 +1,8 @@
 from copy import deepcopy
+from chess_ai.rlagent.muzero.utils import MOVES
 import pickle
 from typing import List, Tuple
+import numpy as np
 
 import pyglet
 from chess_python.chess import Chess
@@ -9,7 +11,7 @@ import torch
 #from chess_ai.classical_agent.agent import Agent
 from chess_ai.rlagent.agent import Agent, AlphaZeroAgent, AlphaZeroAgentPurePolicy
 from chess_ai.rlagent.muzero.models import AlphazeroNetSupervised, ChessNet
-from chess_ai.rlagent.muzero.utils import get_root_dir
+from chess_ai.rlagent.muzero.utils import encode_state, get_root_dir
 
 # with open("model_3.pickle", "rb") as f:
 #     model = pickle.load(f)
@@ -18,7 +20,7 @@ from chess_ai.rlagent.muzero.utils import get_root_dir
 # model.load_state_dict(torch.load(get_root_dir() / "checkpoints/nn_supervised_conv.pth"))
 # model.eval()
 model = ChessNet()
-model.load_state_dict(torch.load(get_root_dir()/  "checkpoints/nn_supervised_conv_kaggle (4).pth", map_location=torch.device('cpu')))
+model.load_state_dict(torch.load(get_root_dir()/  "checkpoints/nn_supervised_conv_kaggle (10).pth", map_location=torch.device('cpu')))
 model.eval()
 
 W = H = 480
@@ -213,11 +215,20 @@ class ChessBoard(pyglet.window.Window):
 
         # recommended_moves = agent.recommend(node=game_copy, order=True, random_flag=False)
         #recommended_moves = Agent(color=game_copy.state.turn, game=game_copy, model=model).recommend()
-        recommended_moves = AlphaZeroAgent(game=game_copy, model=model, n_sim=50).recommend()
+        recommended_moves = AlphaZeroAgent(game=game_copy, model=model, n_sim=200).recommend()
         #recommended_moves = AlphaZeroAgentPurePolicy(game=game_copy, model=model).recommend()
+        # DEBUG
+        x = torch.tensor(np.concatenate([encode_state(game_copy.state), np.array([0]*5)]), dtype=torch.float32).view(-1,72)
+        v_model, policy = model(x)
+        p = np.array(policy.detach())
+        idx = (-p).argsort()[0][:5]
+        moves = [MOVES[i] for i in idx]
+        print("v of net:", v_model.item())
+        print("5 best moves based on pure policy", moves)
 
         # in case there are several moves with same value
         best_move = recommended_moves[0][0]
+        print("Best move: ", best_move)
         if DEBUG:
             print("Agent recomendation: ", best_move)
         self.game.move(best_move)

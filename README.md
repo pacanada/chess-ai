@@ -52,12 +52,15 @@ Important for testing TODO:
 
 
 ## ideas:
-Supervised training for initial nn
+- [] Supervised training for initial nn, it doesnt seems to perform better. Check that mcts is doing something that makes sense
+- [] Automate generation of buffer with current net, train and evaluate: does it perform better? If yes, update
 Introduce temperature, not only the most visited node
 Evaluate previous nets
+
 
 ## problems
 - [x] en-passant not showing in stockfish 
 - [x] do the processing of evaluation and policy after generating the dataset
 - [x] policies and evaluation change even for the same state in supervised dataset
 - [x] value head learn, policy doesnt seem to (it does, just need a bigger network). Use Log_sfotmax instead of pure softmax! Crazy difference
+- [ ] the encoded state (if using the input of 64) does not have information for which player is playing!! -> It looks better now but the policy does not change with pos
