@@ -20,7 +20,7 @@ black.eval()
 
 
 white = ChessNet()
-white.load_state_dict(torch.load(get_root_dir()/  "checkpoints/nn_supervised_conv_kaggle (4).pth", map_location=torch.device('cpu')))
+white.load_state_dict(torch.load(get_root_dir()/  "checkpoints/nn_supervised_conv_kaggle_with_5_runs.pth", map_location=torch.device('cpu')))
 white.eval()
 
 for i in range(10):
@@ -30,7 +30,7 @@ for i in range(10):
         model = white if game.state.turn==1 else black
         if game.state.turn ==1:
 
-            recommended_moves = AlphaZeroAgent(game=deepcopy(game), model=model, n_sim=40).recommend()
+            recommended_moves = AlphaZeroAgent(game=deepcopy(game), model=model, n_sim=100).recommend()
             #recommended_moves = AlphaZeroAgentPurePolicy(game=game_copy, model=model).recommend()
 
             # in case there are several moves with same value
@@ -51,7 +51,7 @@ for i in range(10):
         # #    suggested_move = np.random.choice(game.legal_moves())
         # #print(suggested_move)
         game.move(best_move)
-        #print(game)
+        print(game)
         game.update_outcome()
         #print(game)
         if game.result is not None:
