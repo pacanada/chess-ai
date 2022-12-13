@@ -20,7 +20,7 @@ from chess_ai.rlagent.muzero.utils import encode_state, get_root_dir
 # model.load_state_dict(torch.load(get_root_dir() / "checkpoints/nn_supervised_conv.pth"))
 # model.eval()
 model = ChessNet()
-model.load_state_dict(torch.load(get_root_dir()/  "checkpoints/nn_supervised_conv_kaggle (10).pth", map_location=torch.device('cpu')))
+model.load_state_dict(torch.load(get_root_dir()/  "checkpoints/nn_supervised_conv_kaggle_with_5_runs.pth", map_location=torch.device('cpu')))
 model.eval()
 
 W = H = 480
@@ -215,7 +215,7 @@ class ChessBoard(pyglet.window.Window):
 
         # recommended_moves = agent.recommend(node=game_copy, order=True, random_flag=False)
         #recommended_moves = Agent(color=game_copy.state.turn, game=game_copy, model=model).recommend()
-        recommended_moves = AlphaZeroAgent(game=game_copy, model=model, n_sim=200).recommend()
+        recommended_moves = AlphaZeroAgent(game=game_copy, model=model, n_sim=10).recommend()
         #recommended_moves = AlphaZeroAgentPurePolicy(game=game_copy, model=model).recommend()
         # DEBUG
         x = torch.tensor(np.concatenate([encode_state(game_copy.state), np.array([0]*5)]), dtype=torch.float32).view(-1,72)

@@ -63,4 +63,5 @@ Evaluate previous nets
 - [x] do the processing of evaluation and policy after generating the dataset
 - [x] policies and evaluation change even for the same state in supervised dataset
 - [x] value head learn, policy doesnt seem to (it does, just need a bigger network). Use Log_sfotmax instead of pure softmax! Crazy difference
-- [ ] the encoded state (if using the input of 64) does not have information for which player is playing!! -> It looks better now but the policy does not change with pos
+- [x] the encoded state (if using the input of 64) does not have information for which player is playing!! -> It looks better now but the policy does not change with pos
+- [ ] MCTS runs does not seem to get the mates, if there is only one step until mate it capture it, looks like a bug in the implementation of mcts. Exploration and exploitation doesnt seem to work well. for 0 c_put and 1000 sims, 950 is visited the most common action, for c = 0 is 840. Not a lot of difference. Max of Q[s] is 0...
