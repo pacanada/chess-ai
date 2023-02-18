@@ -4,6 +4,9 @@ __pycache__
 *.egg-info
 .DS_Store
 *.csv
-*.pth
+nn_supervised_conv.pth
+nn_supervised_res.pth
+nn_supervised.pth
 *.feather
 *.pickle
+*.pt
